@@ -38,19 +38,35 @@ async def main():
     model = OpenRouter(Settings())
     results = []
     for name, text, check in CASES:
-        d = await model.decide(
-            {
-                "now_utc": datetime.now(timezone.utc).isoformat(),
-                "commitment": {
-                    "outcome": "200 usable hampers received",
-                    "owner": "venue verifier",
-                },
-                "incoming": {"source": "synthetic-evaluation", "text": text},
-                "operations": [],
-                "evidence": [],
-                "budgets": [],
-            }
-        )
+        d = None
+        for attempt in range(3):
+            try:
+                d = await model.decide(
+                    {
+                        "now_utc": datetime.now(timezone.utc).isoformat(),
+                        "commitment": {
+                            "outcome": "200 usable hampers received",
+                            "owner": "venue verifier",
+                        },
+                        "incoming": {"source": "synthetic-evaluation", "text": text},
+                        "operations": [],
+                        "evidence": [],
+                        "budgets": [],
+                    }
+                )
+                break
+            except Exception as exc:
+                print(name, "transport/model attempt failed:", type(exc).__name__)
+                await asyncio.sleep(2)
+        if d is None:
+            results.append(
+                {
+                    "case": name,
+                    "passed": False,
+                    "error": "Model unavailable after bounded retries",
+                }
+            )
+            continue
         results.append({"case": name, "passed": check(d), "output": d.model_dump()})
         print(name, "PASS" if check(d) else "REVIEW")
     output = Path(".runtime/model-evaluation.json")

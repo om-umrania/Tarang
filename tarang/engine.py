@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
@@ -262,6 +263,13 @@ class Engine:
                     {
                         "event_id": event["id"],
                         "error_type": type(exc).__name__,
+                        "provider_code": (
+                            str(exc)
+                            if re.fullmatch(
+                                r"model_http_[0-9]{3}|model_not_configured", str(exc)
+                            )
+                            else None
+                        ),
                         "attempt": attempts,
                     },
                 )

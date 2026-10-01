@@ -346,3 +346,59 @@ def test_operator_scheduled_check_is_authenticated(env):
         == 200
     )
     assert env.store.snapshot()["commitments"][0]["next_check"] <= time.time() + 31
+
+
+def test_decor_booking_approval_does_not_close_physical_outcome(env):
+    with env.store.tx() as db:
+        db.execute(
+            "INSERT INTO budgets VALUES(?,?,?,?,?,?,?)",
+            (
+                "decor",
+                5000000,
+                500000,
+                False,
+                "Approved mandap design",
+                "Petal Inn",
+                "booking",
+            ),
+        )
+    op = Operation(
+        key="decor-booking",
+        kind="booking",
+        recipient="Petal Inn",
+        category="decor",
+        amount_paise=4000000,
+        specification="Approved mandap design",
+        expires_in_seconds=600,
+    )
+    env.model.decision = decision(op)
+    env.ingest(update())
+    step(env)
+    assert ops(env)[0]["state"] == "approval"
+    env.ingest(update(2, callback="approve:1"))
+    step(env)
+    eid = env.add_evidence(
+        EvidenceInput(
+            commitment_id=1,
+            operation_id=1,
+            source="Illustrative booking confirmation",
+            mode="illustrative-fixture",
+            content="Booking accepted; physical setup not complete",
+            result="succeeded",
+        )
+    )
+    env.model.decision = decision(close=[eid])
+    step(env)
+    assert env.store.snapshot()["commitments"][0]["state"] == "open"
+
+
+def test_declined_proposal_cannot_be_replayed_under_new_key(env):
+    budget(env, False)
+    env.model.decision = decision(operation())
+    env.ingest(update())
+    step(env)
+    env.ingest(update(2, callback="reject:1"))
+    step(env)
+    env.model.decision = decision(operation("different-key"))
+    step(env)
+    assert len(ops(env)) == 1 and ops(env)[0]["state"] == "rejected"
