@@ -1,75 +1,80 @@
-# Project Handoff
+# Tarang handoff · 1 October 2026
 
-## Current State
+## Live prototype
 
-Phase 2 now has a proposed persona, full/short prompt and 15 synthetic evaluation
-cases. These have not been run against a model. Python is confirmed; Render and
-Vercel are hosting candidates. Render is recommended for the worker architecture,
-but no provider/tier/database/model is selected and nothing is deployed.
-Start with `docs/PERSONA.md` and `docs/PHASE_2.md` for this iteration.
+- Bot: https://t.me/tarang_wedding_bot (allowlisted private chat only).
+- App/operator workspace: https://tarang-prototype.onrender.com.
+- Render web service: `srv-dav71cvpn0mc73affks0`, free, Singapore.
+- PostgreSQL: `dpg-dav6ujp42hec73d8bll0-a`, free, private-network access only;
+  expires **31 October 2026**. No paid resources were created.
+- Temporary model: `nvidia/nemotron-3-super-120b-a12b:free` through OpenRouter.
+  Gemini 3.8 Flash remains the paid candidate once credit access is restored.
+- Telegram webhook registered with a secret header; commands start/status/pause/resume.
+- Credentials are in ignored `.env` locally and Render's secret file. Never print
+  them. Original PDFs and unrelated `.DS_Store` changes remain untouched.
 
-Experience design completed on 1 October 2026 for review. Om requested both
-journeys be designed before implementation, confirmed Telegram for the prototype,
-and chose autonomous ₹1,200 courier recovery within an approved category budget.
-The numeric spending cap remains configurable; ₹5,000 is illustrative.
+## Verified evidence
 
-## What Has Been Implemented
+- 16 runtime contract tests pass in `.venv`: duplicate inputs/intents, budgets,
+  exact authority, expiry, single-use approval, refusal of unauthorised results,
+  pause, physical-outcome closure, unknown sends and restart.
+- Static review JS/local links and whitespace checks pass.
+- OpenRouter live greeting and incomplete-delivery probes worked.
+- Four additional synthetic model probes passed: short delivery, vendor injection,
+  first greeting and payment timeout. Outputs are saved privately in
+  `.runtime/model-evaluation.json`; they are not real rail evidence or the full
+  15-case persona evaluation. Transient local transport failures needed retries.
+- Real Telegram `/start` updates reached the deployed model; two replies were
+  acknowledged by Telegram and recorded as sent. Webhook queue was zero with no
+  reported Telegram error. This is transport proof, not proof Om read the messages.
+- PostgreSQL commitment, events and sent-message records survived redeployment.
+- Authenticated operator console loaded live records; unauthenticated state access
+  is rejected. A screenshot is saved in this chat's visualization directory.
+- Real scheduled clock event fired about one second after its requested due time.
+  Its model call failed three times and reached the bounded failed state. Timer
+  dispatch and retry persistence are verified; successful scheduled model follow-up
+  is **not yet verified**. The fixed-synthetic hosted diagnostic identifies **model_http_402**: OpenRouter
+  currently blocks the paid model for credit/payment reasons. Key validation
+  succeeds; the free Nemotron candidate is being configured as the temporary route.
 
-- Static interactive review: 7 décor moments, 7 courier moments, 3 unbudgeted
-  courier moments and 4 proposed onboarding cards.
-- Seven types of exception exposed where relevant: vendor silence, unanswered
-  approval, decline, unknown payment, missing proof, infeasible delivery, restart.
-- Written experience contract, proposed architecture, decision register and
-  project harness. No agent runtime, scheduler, model or integrations exist.
+## Boundaries and remaining work
 
-## Important Files
+Free compute sleeps, so scheduled checks can run late until inbound traffic wakes
+it. Do not describe this host as always-on. Free PostgreSQL also needs migration
+or export before expiry. One active commitment per private chat; no group or
+multi-wedding support yet. One worker leader; no horizontally scaled queue.
 
-- `docs/index.html`: standalone review, no external dependencies.
-- `docs/EXPERIENCE_DESIGN.md`: full journeys, vendor scripts and failure handling.
-- `docs/DECISIONS.md`: confirmed decisions versus proposals and unknowns.
-- `docs/ARCHITECTURE.md`: proposed persistence, policy, operations and evidence.
-- `resources/`: unchanged original briefs and historical context.
+Financial intents become operator requests only. No actual payment, vendor call,
+booking or courier API is connected. [RAILS.md](RAILS.md) reconciles the new mails
+and explains each gap. The Gnani STT adapter is implemented from current docs;
+Om said they will supply GNANI_API_KEY and an authorised audio path. No live Gnani
+response has been recorded. Pine Labs product contracts and Delhivery feasibility
+remain unverified in the specific required form.
 
-## How To Run
+Category budgets are deliberately not installed from storyboard fixtures. The
+₹5,000 cap remains illustrative. Approval for a ₹40,000 booking does not delegate
+future surcharges. Unknown obligations stay reserved. A model-generated new key
+cannot duplicate an identical financial intent.
 
-Open `docs/index.html` directly, or serve `docs/` on loopback with
-the command in README. The review tab was left open in Codex. The preview server
-was started on port 8765 for this session; restart it if that process ends.
+General conversational copy remains model-generated and needs broader evaluation.
+The runtime replaces model wording for proposed actions and closure with precise
+execution facts. Do not promote rehearsal evidence to actual fulfilment.
 
-## How To Validate
+## Continue
 
-`./scripts/check.sh` passed: JavaScript syntax, duplicate HTML IDs, local links
-and `git diff --check`. Browser review traversed all 21 moments and 16 exception
-selections, plus approval/detail/decline/return navigation using keyboard controls.
-The 390px layout initially overflowed; `min-width: 0` on grid children fixed it.
-Read-only DOM checks then measured no horizontal page overflow at 390 and 1280px.
+Read [RUNTIME.md](RUNTIME.md), then [RAILS.md](RAILS.md). The API, engine, store and
+schemas are under `tarang/`; actual prompt assembly uses `prompts/runtime.md` plus
+the full persona section. `scripts/evaluate_model.py` uses synthetic inputs only.
+The authenticated `/api/model-check` diagnostic also uses fixed synthetic input;
+it must not replay private Telegram histories for debugging without permission.
 
-Mouse automation in the in-app browser was inconsistent around scrolling and
-viewport overrides; keyboard activation reliably exercised the actual controls.
-Do not call this an exhaustive cross-browser or accessibility audit. No live
-agent, API, payment, scheduling or recovery behaviour has been tested.
+Use `.venv/bin/python -m pytest -q` and `PATH="$PWD/.venv/bin:$PATH" ./scripts/check.sh`.
+Render auto-deploy is off; push does not change the live service until an explicit
+`render deploys create` succeeds. Preserve free plans unless Om changes the budget.
 
-## Known Issues
+## Design history
 
-Exact rail endpoints/payloads and account access need validation. A same-day
-Delhivery rescue for 200 hampers at ₹1,200 is not established. Confirm origin,
-package details, payment semantics, budgets, cap, approver rule, verifier and
-retry/expiry timings before affected implementation. See the decision register.
-
-The ₹40,000 replacement approval cannot silently authorise the later ₹2,500
-surcharge: that autonomous action needs its own pre-existing delegated scope.
-Recovery, physical fulfilment and financial reconciliation are separate outcomes.
-
-## Next Steps
-
-Review the persona relationship/language and representative copy with Om, select
-the model and run the evaluation cases, resolve dependent authority/hosting
-choices, then implement the smallest complete Python commitment loop.
-Do not implement a fixed sequence of storyboard actions as the agent.
-
-## Notes For Future Codex Sessions
-
-Follow the current decision register over conflicting historical context. Preserve
-unverified status and source provenance. The user’s `.DS_Store` modification was
-already present before this work; leave it alone. No deployment or external
-messages were performed. Git history records publication of the design artifacts.
+The standalone storyboard `docs/index.html` contains both designed journeys,
+onboarding proposals and failure branches. Earlier design publication was
+`4acfd5f`; user commit `2fe600f` renamed the review to `index.html`. The submitted
+competition resources remain authoritative over invented capabilities.

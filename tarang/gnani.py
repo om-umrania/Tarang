@@ -10,6 +10,7 @@ import asyncio
 import hashlib
 import json
 import os
+import time
 from pathlib import Path
 import httpx
 from .config import Settings
@@ -68,6 +69,11 @@ async def main():
     settings = Settings()
     try:
         receipt = await transcribe(args.audio, args.language)
+        saved = Path(".runtime") / f"gnani-receipt-{time.time_ns()}.json"
+        saved.parent.mkdir(exist_ok=True)
+        saved.write_text(json.dumps(receipt, indent=2))
+        saved.chmod(0o600)
+        print("Exact API receipt saved locally:", saved)
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(
                 os.getenv("TARANG_URL", "http://127.0.0.1:8766").rstrip("/")

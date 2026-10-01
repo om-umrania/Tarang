@@ -72,3 +72,9 @@ explicit decision or prove an integration works.
   sleeping compute means deferred due checks, and the DB expires 31 October.
 - New PDFs under resources/mails were read; Round 2 source constraints reconciled
   with the later Round 3 simulation. See [RAILS.md](RAILS.md).
+
+- Gemini Flash worked initially but the hosted model path later returned HTTP 402.
+  With model selection delegated and no answer to the optional model-route question
+  after several minutes, selected a tested free OpenRouter Nemotron candidate as
+  temporary default. Gemini remains configurable; this is not a claim of equivalent
+  quality or a completed model benchmark.

@@ -1,3 +1,5 @@
+> Runtime update: four separate live synthetic probes have passed via OpenRouter. The full 15-case rubric below remains unexecuted; see [handoff](HANDOFF.md).
+
 # Persona evaluation cases · draft
 
 **Status: authored, not executed against a model.** These are synthetic review

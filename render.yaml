@@ -18,7 +18,7 @@ services:
       - key: TELEGRAM_MODE
         value: webhook
       - key: MODEL
-        value: google/gemini-3.8-flash
+        value: nvidia/nemotron-3-super-120b-a12b:free
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: TELEGRAM_ALLOWED_USER_IDS

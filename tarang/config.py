@@ -26,7 +26,9 @@ class Settings:
     operator_token: str = field(default_factory=lambda: os.getenv("OPERATOR_TOKEN", ""))
     model_key: str = field(default_factory=lambda: os.getenv("OPENROUTER_API_KEY", ""))
     model: str = field(
-        default_factory=lambda: os.getenv("MODEL", "google/gemini-3.8-flash")
+        default_factory=lambda: os.getenv(
+            "MODEL", "nvidia/nemotron-3-super-120b-a12b:free"
+        )
     )
     timezone: str = field(default_factory=lambda: os.getenv("TIMEZONE", "Asia/Kolkata"))
     free_host: bool = field(default_factory=lambda: os.getenv("RENDER") == "true")

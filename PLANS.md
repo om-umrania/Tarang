@@ -2,9 +2,9 @@
 
 1. Python state, policy, jobs, Telegram and operator console: implemented.
 2. OpenRouter model and bot credentials: live checks passed.
-3. Free Render/PostgreSQL deployment: in progress; see handoff for verified status.
+3. Free Render/PostgreSQL deployment: live; Telegram round trip and persistence verified.
 4. Gnani speech adapter: implemented from current docs; real API evidence requires key/audio.
 5. Pine Labs/Delhivery: operator-assisted requests and labelled evidence; precise product contracts still need validation.
-6. Tests, two-journey rehearsals and cloud restart verification: in progress.
+6. 16 contract tests and four live model probes pass. Full journey rehearsals and successful scheduled model follow-up remain open.
 
 The previous persona and experience design remains the reference in docs/.

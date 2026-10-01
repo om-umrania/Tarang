@@ -31,7 +31,7 @@ and opening a second outcome in the same chat need a later data-model iteration.
 
 FastAPI accepts authenticated Telegram webhooks or uses long polling (default).
 Updates are durably deduplicated. A single process runs model decision jobs,
-clock-derived due checks and a message outbox. Gemini Flash through OpenRouter receives persona, policy,
+clock-derived due checks and a message outbox. The selected model through OpenRouter receives persona, policy,
 schema and structured state. Pydantic validates every proposal. Monetary values
 are INR paise. The operator console configures actual rehearsal authority; no
 scenario budget is silently installed.
@@ -117,9 +117,13 @@ connections; hosted services access it on Render's private network.
 
 Telegram webhook verification uses a separate secret header. Do not run local
 polling while the webhook is active. Hosting costs are free for the selected tier;
-OpenRouter token usage is separate. Gemini 3.8 Flash is the selected starting
+OpenRouter token usage is separate. Gemini 3.8 Flash was the selected starting
 model after a successful structured-output and incomplete-delivery smoke test;
-this is a candidate choice, not a completed comparative benchmark.
+this is a candidate choice, not a completed comparative benchmark. Subsequent
+hosted calls returned HTTP 402: model credits/fallback selection need resolution
+(see handoff), even though the key itself validates. A tested free Nemotron
+candidate is the temporary MODEL default; free provider capacity/rate limits
+can still interrupt requests.
 
 After deployment, verify health, a real Telegram turn, an unattended due check
 while the service is awake and restart persistence. Operator evidence and all
