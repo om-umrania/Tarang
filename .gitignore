@@ -7,3 +7,4 @@ __pycache__/
 *.pyc
 .runtime/
 *.sqlite3*
+bridge/node_modules/

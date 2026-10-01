@@ -67,3 +67,10 @@ class Settings:
     )
     # Explicit sender -> wedding scope routing, never infer a shared wedding.
     whatsapp_routes: dict[str, str] = field(default_factory=whatsapp_routes_from_env)
+    group_enabled: bool = field(
+        default_factory=lambda: os.getenv("WHATSAPP_GROUP_ENABLED") == "true"
+    )
+    group_id: str = field(default_factory=lambda: os.getenv("WHATSAPP_GROUP_ID", ""))
+    group_bridge_token: str = field(
+        default_factory=lambda: os.getenv("WHATSAPP_BRIDGE_TOKEN", "")
+    )

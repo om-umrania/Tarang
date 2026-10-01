@@ -204,7 +204,27 @@ class Engine:
             if c["paused"] or c["state"] != "open":
                 db.execute("UPDATE events SET status='held' WHERE id=?", (event["id"],))
                 return True
+            group_context = None
+            if self.settings.group_enabled:
+                group_run = db.execute(
+                    "SELECT created,result FROM group_runs ORDER BY id DESC LIMIT 1"
+                ).fetchone()
+                group_state = db.execute(
+                    "SELECT value FROM metadata WHERE key='group_monitor'"
+                ).fetchone()
+                gs = json.loads(group_state["value"]) if group_state else {}
+                if gs.get("group_id") == self.settings.group_id:
+                    group_context = {
+                        "last_review_at": group_run["created"] if group_run else None,
+                        "review": (
+                            json.loads(group_run["result"]) if group_run else None
+                        ),
+                        "source_fresh": bool(gs.get("source_connected"))
+                        and time.time() - gs.get("last_received", 0) < 180,
+                        "note": "Source claims only; not verified authority or complete chat history.",
+                    }
             context = {
+                "wedding_group_review": group_context,
                 "now_utc": datetime.now(timezone.utc).isoformat(),
                 "commitment": c,
                 "incoming": {"source": event["source"], "payload": payload},

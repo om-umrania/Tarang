@@ -1,0 +1,20 @@
+# Linux template. Set the real checkout path and a dedicated unprivileged service user.
+# Pair interactively first; never put credentials in this unit or source control.
+[Unit]
+Description=Tarang receive-only wedding group bridge
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=tarang
+WorkingDirectory=/opt/tarang/bridge
+ExecStart=/usr/bin/node --env-file=.env bridge.mjs
+Restart=on-failure
+RestartSec=15
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

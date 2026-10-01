@@ -29,7 +29,15 @@ class OpenRouter:
         ).read_text()
         return await self.structured(context, policy, ConflictReport)
 
-    async def structured(self, context, policy, schema):
+    async def review_group(self, context):
+        from .schema import GroupReview
+
+        policy = (
+            Path(__file__).resolve().parent.parent / "prompts/group-review.md"
+        ).read_text()
+        return await self.structured(context, policy, GroupReview, max_tokens=8000)
+
+    async def structured(self, context, policy, schema, max_tokens=4000):
         if not self.settings.model_key:
             raise RuntimeError("model_not_configured")
         async with httpx.AsyncClient(timeout=60) as client:
@@ -45,13 +53,13 @@ class OpenRouter:
                     "response_format": {
                         "type": "json_schema",
                         "json_schema": {
-                            "name": "tarang_decision",
+                            "name": "tarang_" + schema.__name__.lower(),
                             "strict": True,
                             "schema": schema.model_json_schema(),
                         },
                     },
                     "provider": {"require_parameters": True},
-                    "max_tokens": 4000,
+                    "max_tokens": max_tokens,
                     "temperature": 0.3,
                 },
             )

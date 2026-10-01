@@ -14,6 +14,8 @@ from .adapters import OpenRouter, Telegram
 from .engine import Engine
 from .schema import EvidenceInput, BudgetInput, CheckInput, ConflictReview
 from .whatsapp import ConflictMonitor
+from .group_monitor import GroupMonitor
+from .schema import GroupBatch
 
 
 def create_app(settings=None, model=None, telegram=None, run_worker=True):
@@ -23,6 +25,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     engine = Engine(store, settings, model or OpenRouter(settings), telegram)
 
     monitor = ConflictMonitor(store, settings, engine.model)
+    group_monitor = GroupMonitor(store, settings, engine.model)
 
     async def worker():
         engine.recover()
@@ -36,6 +39,18 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                 with store.tx() as db:
                     Store.log(db, None, "worker_error", {"type": type(exc).__name__})
             await asyncio.sleep(1)
+
+    async def group_worker():
+        while True:
+            try:
+                await group_monitor.step()
+            except Exception as exc:
+                with store.tx() as db:
+                    Store.log(
+                        db, None, "group_worker_error", {"type": type(exc).__name__}
+                    )
+                await asyncio.sleep(55)
+            await asyncio.sleep(5)
 
     async def poll():
         while True:
@@ -118,6 +133,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                         "Only one worker may use this database"
                     ) from None
             tasks.append(asyncio.create_task(lead_worker()))
+            tasks.append(asyncio.create_task(group_worker()))
             if settings.telegram_mode == "polling" and settings.bot_token:
                 tasks.append(asyncio.create_task(poll()))
         yield
@@ -138,6 +154,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     )
     app.state.engine = engine
     app.state.monitor = monitor
+    app.state.group_monitor = group_monitor
 
     def authorised(value):
         if not settings.operator_token or not hmac.compare_digest(
@@ -255,6 +272,29 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                 {"conflict_id": conflict_id, **body.model_dump()},
             )
         return {"ok": True}
+
+    @app.post("/whatsapp/group-batch")
+    async def group_batch(request: Request, authorization: str = Header(default="")):
+        if not group_monitor.ready or not hmac.compare_digest(
+            authorization, "Bearer " + settings.group_bridge_token
+        ):
+            raise HTTPException(403, "Group bridge is not authorised")
+        raw = bytearray()
+        async for chunk in request.stream():
+            raw.extend(chunk)
+            if len(raw) > 1500000:
+                raise HTTPException(413, "Batch too large")
+        try:
+            batch = GroupBatch.model_validate_json(raw)
+            count = group_monitor.ingest(batch)
+        except ValueError:
+            raise HTTPException(400, "Invalid or unauthorised group batch") from None
+        return {"accepted": count}
+
+    @app.get("/api/group-monitor")
+    def group_status(authorization: str = Header(default="")):
+        authorised(authorization)
+        return group_monitor.status()
 
     @app.get("/api/state")
     def state(authorization: str = Header(default="")):

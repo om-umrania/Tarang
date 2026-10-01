@@ -77,3 +77,37 @@ class ConflictReport(Strict):
 class ConflictReview(Strict):
     state: Literal["resolved", "dismissed", "review"]
     note: str = Field(min_length=1, max_length=1000)
+
+
+class GroupMessage(Strict):
+    source_id: str = Field(min_length=1, max_length=300)
+    external_id: str = Field(min_length=1, max_length=300)
+    sender: str = Field(min_length=1, max_length=200)
+    text: str = Field(max_length=12000)
+    sent_at: float = Field(gt=0)
+    kind: Literal["text", "unsupported", "deleted"] = "text"
+
+
+class GroupBatch(Strict):
+    group_id: str = Field(min_length=1, max_length=200)
+    connected: bool
+    messages: list[GroupMessage] = Field(max_length=100)
+
+
+class WeddingFact(Strict):
+    event: str = Field(min_length=1, max_length=200)
+    date_text: str = Field(max_length=300)
+    status: Literal[
+        "proposed", "source_confirmed", "cancelled", "conflicting", "unknown"
+    ]
+    source: ConflictSource
+
+
+class GroupReview(Strict):
+    summary: str = Field(max_length=1500)
+    wedding_date_status: Literal[
+        "unknown", "proposed", "source_confirmed", "conflicting", "past_needs_review"
+    ]
+    facts: list[WeddingFact] = Field(max_length=40)
+    conflicts: list[Conflict] = Field(max_length=8)
+    questions: list[str] = Field(max_length=5)

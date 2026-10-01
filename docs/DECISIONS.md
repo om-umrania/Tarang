@@ -86,3 +86,11 @@ receive-only direct-message webhook and scoped conflict-review foundation, disab
 pending source choice and configuration. Whether the intended source is direct messages,
 an existing group or forwarded conversations remains open. No personal archive access,
 participant posting, automatic conflict resolution or added spending authority inferred.
+
+### Hourly backend monitoring clarification
+
+Om explicitly requires backend automation for the existing wedding group, approximately
+hourly, rather than manual Codex checks or exports. Om selected a dedicated WhatsApp
+account. Implemented isolated linked-device bridge and hourly Python review job;
+pairing, target group ID and always-on hosting remain required for live operation.
+Do not call the previous direct-message Cloud API adapter an existing-group connector.

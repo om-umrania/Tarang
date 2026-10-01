@@ -15,6 +15,9 @@ CREATE TABLE IF NOT EXISTS ledger(id INTEGER PRIMARY KEY, commitment INTEGER, ki
 CREATE TABLE IF NOT EXISTS outbox(id INTEGER PRIMARY KEY, key TEXT NOT NULL UNIQUE, chat INTEGER NOT NULL, payload TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'pending');
 CREATE TABLE IF NOT EXISTS conversation_messages(id INTEGER PRIMARY KEY, external_id TEXT NOT NULL UNIQUE, scope TEXT NOT NULL, sender TEXT NOT NULL, body TEXT NOT NULL, sent_at REAL NOT NULL, received_at REAL NOT NULL, status TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, due REAL NOT NULL, error TEXT);
 CREATE TABLE IF NOT EXISTS conflicts(id INTEGER PRIMARY KEY, fingerprint TEXT NOT NULL UNIQUE, scope TEXT NOT NULL, report TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'review', created REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS group_messages(id INTEGER PRIMARY KEY, external_id TEXT NOT NULL UNIQUE, source_id TEXT NOT NULL, sender TEXT NOT NULL, body TEXT NOT NULL, sent_at REAL NOT NULL, received_at REAL NOT NULL, kind TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS group_messages_source ON group_messages(source_id,id);
+CREATE TABLE IF NOT EXISTS group_runs(id INTEGER PRIMARY KEY, created REAL NOT NULL, through_id INTEGER NOT NULL, result TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
 """
 
@@ -107,6 +110,7 @@ class Store:
                     "outbox",
                     "conversation_messages",
                     "conflicts",
+                    "group_runs",
                 )
             }
 
@@ -152,7 +156,7 @@ class PostgresConnection:
             sql += " ON CONFLICT DO NOTHING"
         inserted = bool(
             re.match(
-                r"INSERT INTO (commitments|events|operations|evidence|ledger|outbox|conversation_messages|conflicts)\b",
+                r"INSERT INTO (commitments|events|operations|evidence|ledger|outbox|conversation_messages|conflicts|group_messages|group_runs)\b",
                 sql,
             )
         )

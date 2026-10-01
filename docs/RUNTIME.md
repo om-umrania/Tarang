@@ -147,3 +147,11 @@ records the model result and replies with a test label, but preserves the existi
 commitment, next check and authority. It suppresses operation/closure proposals.
 This does not pause other scheduled real work; use an isolated database for a fully
 separate rehearsal. See END_TO_END_TESTING.md for actual verification evidence.
+
+## Hourly group backend
+
+[HOURLY_GROUP_AUTOMATION.md](HOURLY_GROUP_AUTOMATION.md) describes the separate dedicated-account
+bridge and persisted hourly review worker. The group monitor defaults off until pairing
+and exact group ID/token configuration are complete. Its review feeds Telegram context;
+it does not depend on Codex running or manual chat exports. Timely runs require awake
+compute and a connected, supervised bridge with durable storage.
