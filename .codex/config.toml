@@ -1,0 +1,9 @@
+# Project-specific Codex config
+
+[profiles.default]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.review]
+approval_policy = "on-request"
+sandbox_mode = "read-only"

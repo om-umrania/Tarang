@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Tarang · Experience review</title>
+  <style>
+    :root { --paper:#f6f3eb; --ink:#253e36; --muted:#627068; --line:#d9dfd5; --orange:#b34a29; --lime:#e9edb4; --white:#fffefa; --soft:#e8eee5; --amber:#81521c; --shadow:0 16px 42px #263e3510; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font-family:"Avenir Next",Avenir,"Trebuchet MS",sans-serif; font-size:15px; line-height:1.55; }
+    button,select { font:inherit; }
+    button,a,select { -webkit-tap-highlight-color:transparent; }
+    button { cursor:pointer; }
+    button:disabled { opacity:.42; cursor:default; }
+    button:focus-visible,a:focus-visible,select:focus-visible,summary:focus-visible { outline:3px solid var(--orange); outline-offset:4px; }
+    a { color:var(--ink); text-underline-offset:4px; }
+    .skip { position:absolute; top:-80px; background:var(--white); padding:12px; z-index:5; }
+    .skip:focus { top:8px; }
+    .wrap { max-width:1376px; margin:auto; padding:0 44px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px 0; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:10px; font-family:Georgia,serif; font-size:31px; letter-spacing:-1.7px; }
+    .brand svg { width:34px; height:34px; }
+    .edition { font-size:11px; text-transform:uppercase; letter-spacing:1.8px; color:var(--muted); }
+    header nav { display:flex; gap:25px; font-size:12px; }
+    .hero { display:grid; grid-template-columns:1.3fr 1fr; gap:80px; align-items:end; padding:38px 0 30px; }
+    .eyebrow { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--orange); }
+    h1 { font:normal clamp(35px,4.4vw,60px)/1.06 Georgia,"Times New Roman",serif; letter-spacing:-2.5px; margin:12px 0 0; }
+    h1 em { font-weight:normal; color:var(--orange); }
+    .hero p { max-width:450px; font-size:14px; color:var(--muted); margin:0 0 12px; }
+    .statusline { display:flex; gap:8px; flex-wrap:wrap; }
+    .pill { display:inline-flex; align-items:center; border:1px solid var(--line); padding:4px 10px; border-radius:30px; font-size:10px; font-weight:600; }
+    .pill.green { background:var(--soft); border-color:var(--soft); }
+    .notice { border-left:3px solid var(--orange); padding:10px 15px; background:#eee9de; font-size:12px; margin-bottom:25px; }
+    .scenario-nav { display:flex; gap:4px; border-bottom:1px solid var(--line); }
+    .scenario-nav button { flex:1; background:none; border:0; border-bottom:3px solid transparent; text-align:left; padding:15px 13px; color:var(--muted); font-size:13px; }
+    .scenario-nav button[aria-pressed="true"] { color:var(--ink); border-color:var(--orange); font-weight:700; background:#eeeee3; }
+    .scenario-nav button span { display:block; font-size:9px; text-transform:uppercase; letter-spacing:1.6px; margin-bottom:3px; font-weight:500; }
+    .journey-head { display:flex; justify-content:space-between; gap:25px; padding:23px 0 18px; align-items:center; }
+    .journey-head h2 { font:normal 25px/1.2 Georgia,serif; letter-spacing:-.6px; margin:0 0 5px; }
+    .journey-head p { margin:0; font-size:12px; color:var(--muted); max-width:660px; }
+    .variation { min-width:230px; }
+    .variation label { display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; color:var(--muted); }
+    select { width:100%; padding:10px 30px 10px 12px; background:var(--white); color:var(--ink); border:1px solid var(--line); border-radius:4px; font-size:12px; }
+    .workspace { display:grid; grid-template-columns:175px minmax(270px,1fr) minmax(300px,1.08fr); gap:25px; padding-bottom:25px; align-items:start; }
+    .workspace > * { min-width:0; }
+    .steps { padding-top:5px; }
+    .steps ol { list-style:none; padding:0; margin:0; }
+    .steps li { position:relative; }
+    .steps li:not(:last-child):before { content:""; position:absolute; width:1px; background:var(--line); top:33px; bottom:-6px; left:15px; }
+    .steps button { border:0; background:none; color:var(--muted); padding:10px 0; width:100%; display:flex; gap:10px; text-align:left; align-items:center; font-size:12px; }
+    .steps button[aria-current="step"] { color:var(--ink); font-weight:700; }
+    .step-num { flex-shrink:0; height:31px; width:31px; display:grid; place-items:center; border:1px solid var(--line); border-radius:50%; background:var(--paper); font-size:10px; }
+    [aria-current="step"] .step-num { background:var(--ink); color:var(--white); border-color:var(--ink); }
+    .step-footer { margin-top:20px; border-top:1px solid var(--line); padding-top:14px; font-size:10px; color:var(--muted); line-height:1.7; }
+    .phone { background:var(--soft); border:1px solid #c5d1c5; border-radius:20px; overflow:hidden; box-shadow:var(--shadow); }
+    .phone-top { background:var(--white); padding:18px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); }
+    .avatar { border-radius:50%; width:38px; height:38px; background:var(--ink); color:var(--lime); display:grid; place-items:center; font:23px Georgia,serif; }
+    .phone-top b { font-size:13px; }
+    .phone-top small { display:block; font-size:10px; color:var(--muted); }
+    .phone-label { margin-left:auto; font-size:9px; text-transform:uppercase; letter-spacing:1.3px; color:var(--muted); }
+    .chat { min-height:315px; padding:18px 17px 22px; background-image:radial-gradient(#63775c14 .8px,transparent .8px); background-size:12px 12px; }
+    .date { text-align:center; font-size:10px; color:var(--muted); margin:0 0 18px; }
+    .bubble { border-radius:11px 11px 11px 2px; background:var(--white); padding:14px 15px; margin-bottom:10px; font-size:13px; line-height:1.65; box-shadow:0 2px 4px #203a3010; white-space:pre-line; }
+    .bubble.user { margin-left:35px; background:#d7e8cd; border-radius:11px 11px 2px 11px; }
+    .sender { display:block; font-size:10px; font-weight:700; color:var(--orange); margin-bottom:4px; }
+    .silent { text-align:center; padding:35px 20px; color:var(--muted); }
+    .silent svg { width:42px; height:42px; opacity:.55; }
+    .silent strong { display:block; margin:12px 0 7px; font:22px Georgia,serif; color:var(--ink); }
+    .silent p { font-size:12px; margin:0; }
+    .mock-actions { display:grid; gap:7px; }
+    .mock-actions button { border:1px solid #b8cabc; color:var(--ink); background:#f8fcf3; border-radius:7px; padding:9px 10px; font-size:11px; font-weight:600; }
+    .mock-actions button:first-child { background:var(--ink); border-color:var(--ink); color:white; }
+    .chat-note { font-size:10px; color:var(--muted); margin:12px 0 0; }
+    .phone-bottom { padding:12px 18px; background:var(--white); border-top:1px solid var(--line); font-size:10px; color:var(--muted); }
+    .backstage { background:var(--white); border:1px solid var(--line); border-radius:8px; padding:22px 24px; min-height:430px; }
+    .stage-label { display:flex; align-items:center; justify-content:space-between; font-size:9px; letter-spacing:1.3px; text-transform:uppercase; color:var(--muted); }
+    .scene-title { font:normal 28px/1.15 Georgia,serif; letter-spacing:-.7px; margin:13px 0 15px; }
+    .state { display:inline-block; border-radius:3px; padding:4px 7px; font-size:9px; letter-spacing:.7px; color:var(--ink); background:var(--soft); margin-bottom:14px; }
+    .state.attention { color:var(--amber); background:#f8ecd7; }
+    dl { margin:0; }
+    dt { font-size:9px; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); margin:11px 0 4px; }
+    dd { margin:0; font-size:12px; line-height:1.65; }
+    .next { border-top:1px solid var(--line); margin-top:16px; padding-top:12px; }
+    .next b { font-size:10px; text-transform:uppercase; letter-spacing:1px; }
+    .next p { margin:4px 0 0; font-size:12px; }
+    details { margin-top:13px; border-top:1px dashed var(--line); padding-top:10px; }
+    summary { font-size:11px; cursor:pointer; }
+    details p { font-size:11px; color:var(--muted); line-height:1.7; margin:9px 0 0; }
+    .journey-controls { display:flex; align-items:center; justify-content:space-between; padding:17px 0 26px; gap:20px; border-top:1px solid var(--line); }
+    .journey-controls p { margin:0; font-size:11px; color:var(--muted); }
+    .journey-controls .buttons { display:flex; gap:10px; }
+    .control { padding:9px 18px; border:1px solid var(--line); background:transparent; color:var(--ink); border-radius:5px; font-size:12px; }
+    .control.primary { background:var(--ink); border-color:var(--ink); color:white; }
+    .principles { border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(3,1fr); gap:35px; padding:27px 0; }
+    .principles span { font:24px Georgia,serif; color:var(--orange); }
+    .principles h3 { font-size:13px; margin:8px 0 5px; }
+    .principles p { font-size:11px; color:var(--muted); margin:0; }
+    footer { border-top:1px solid var(--line); padding:18px 0 28px; display:flex; gap:25px; justify-content:space-between; font-size:10px; color:var(--muted); }
+    footer p { margin:0; max-width:810px; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media(max-width:1100px) { .wrap { padding:0 26px; } .workspace { grid-template-columns:145px minmax(250px,1fr) minmax(280px,1fr); gap:16px; } .hero { gap:35px; } .backstage { padding:19px; } }
+    @media(max-width:850px) { .workspace { grid-template-columns:1fr 1fr; } .steps { grid-column:1/-1; } .steps ol { display:flex; overflow:auto; gap:8px; padding-bottom:7px; } .steps li { min-width:130px; } .steps li:not(:last-child):before { display:none; } .steps button { font-size:11px; } .step-footer { display:none; } .hero { grid-template-columns:1fr; gap:22px; } .hero p { max-width:600px; } h1 { font-size:44px; } }
+    @media(max-width:580px) { .wrap { padding:0 17px; } header { gap:12px; padding:18px 0; } header nav { gap:12px; font-size:10px; } .edition { display:none; } .hero { padding:27px 0 22px; } h1 { font-size:39px; letter-spacing:-1.6px; } .scenario-nav { display:grid; grid-template-columns:1fr 1fr; gap:0; } .scenario-nav button { font-size:12px; padding:11px 9px; } .journey-head { display:block; } .variation { margin-top:15px; } .workspace { grid-template-columns:1fr; } .phone { max-width:100%; } .chat { min-height:240px; } .backstage { min-height:0; } .journey-controls { flex-wrap:wrap; } .principles { grid-template-columns:1fr; gap:22px; } .principles article { display:grid; grid-template-columns:32px 1fr; gap:0 12px; } .principles h3 { margin:0 0 5px; } .principles p { grid-column:2; } footer { display:block; } footer p + p { margin-top:12px; } }
+    @media(prefers-reduced-motion:no-preference) { .bubble,.backstage { animation:arrive .2s ease-out; } @keyframes arrive { from { opacity:.3; transform:translateY(3px); } to { opacity:1; transform:none; } } }
+    @media print { .wrap { padding:0; } .hero { padding:15px 0; } .scenario-nav,.variation,.steps,.journey-controls,.mock-actions,header nav { display:none; } .workspace { grid-template-columns:1fr 1fr; } .phone,.backstage { box-shadow:none; break-inside:avoid; } footer { display:block; } }
+  </style>
+</head>
+<body>
+<a class="skip" href="#review">Skip to journey review</a>
+<div class="wrap">
+  <header>
+    <div class="brand"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M3 13c7-9 12 9 19 0s12 9 16 0M3 21c7-9 12 9 19 0s12 9 16 0M3 29c7-9 12 9 19 0s12 9 16 0" stroke="#b34a29" stroke-width="2.4"/></svg>tarang</div>
+    <div class="edition">The wedding companion</div>
+    <nav aria-label="Design documents"><a href="EXPERIENCE_DESIGN.md">Full design ↗</a><a href="DECISIONS.md">Decisions ↗</a></nav>
+  </header>
+  <section class="hero">
+    <div><div class="eyebrow">Experience review / 01 October 2026</div><h1>The wedding goes on.<br><em>Tarang follows through.</em></h1></div>
+    <div><p>A quiet companion when things go to plan. A clear recommendation when they don’t. Explore what the couple sees—and what keeps moving behind the conversation.</p><div class="statusline"><span class="pill green">Telegram prototype confirmed</span><span class="pill">Both journeys · design first</span></div></div>
+  </section>
+  <div class="notice"><strong>Interactive storyboard.</strong> Every message, result and event here is illustrative. Nothing is sent, booked or paid. ₹5,000 is an example configurable cap; rail availability and outcome evidence are not verified by this review.</div>
+  <main id="review">
+    <nav class="scenario-nav" aria-label="Choose a journey">
+      <button type="button" data-scenario="decor" aria-pressed="true"><span>01 / Approval-led</span>Décor recovery</button>
+      <button type="button" data-scenario="courier" aria-pressed="false"><span>02 / Within authority</span>Courier recovery</button>
+      <button type="button" data-scenario="exception" aria-pressed="false"><span>03 / Exception variant</span>Unbudgeted courier</button>
+      <button type="button" data-scenario="setup" aria-pressed="false"><span>Before either journey</span>Day-one setup</button>
+    </nav>
+    <section class="journey-head" aria-labelledby="journey-title">
+      <div><h2 id="journey-title"></h2><p id="journey-description"></p></div>
+      <div class="variation"><label for="variation">Explore a difficult moment</label><select id="variation"></select></div>
+    </section>
+    <div id="announcement" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+    <div class="workspace">
+      <nav class="steps" aria-label="Journey steps"><ol id="step-list"></ol><div class="step-footer">Select any step.<br>Each open outcome carries its own next check.<br><br>Dates are scenario context.<br>Timings remain proposals.</div></nav>
+      <section class="phone" aria-label="Illustrative Telegram conversation">
+        <div class="phone-top"><div class="avatar" aria-hidden="true">t</div><div><b>Tarang</b><small>Meera &amp; Rohan’s wedding</small></div><span class="phone-label">Chat mockup</span></div>
+        <div class="chat" id="chat"></div>
+        <div class="phone-bottom">Conversation layout proposal · group/private chat still to decide</div>
+      </section>
+      <section class="backstage" aria-labelledby="scene-title" id="backstage"></section>
+    </div>
+    <div class="journey-controls"><p id="position"></p><div class="buttons"><button type="button" class="control" id="previous">← Previous</button><button type="button" class="control primary" id="next">Next moment →</button></div></div>
+  </main>
+  <section class="principles" aria-label="Experience principles">
+    <article><span>01</span><h3>Ask with a recommendation.</h3><p>What changed, the best available fix, exact scope and cost, and when a decision is needed.</p></article>
+    <article><span>02</span><h3>Keep the next check.</h3><p>A vendor’s silence or a pending payment is a reason to follow up. The couple should never have to restart the loop.</p></article>
+    <article><span>03</span><h3>Close with evidence.</h3><p>A booking secures a plan. Venue verification proves the outcome. Outstanding payments remain visible separately.</p></article>
+  </section>
+  <footer><p>Review only. The eventual agent must choose its own actions. These navigation controls are not the agent logic. Logistics support, exact rail payloads, named approvers, budgets and timing policies need validation before implementation.</p><p><a href="ARCHITECTURE.md">Proposed architecture ↗</a></p></footer>
+</div>
+<script>
+'use strict';
+// Declarative storyboard content only. No model, network calls, state machine or real approvals.
+const message = (from, text) => ({from, text});
+const scenes = {
+  decor: {
+    title:'One decision. A wedding kept on course.',
+    description:'11–14 December · Restore the mandap plan, then follow it all the way to verified setup.',
+    steps:[
+      {label:'The question',title:'Give a clear next step.',date:'11 December · Status request',state:'ACTION',messages:[message('Rohan','Is the mandap décor moving smoothly?'),message('Tarang','I’m checking with Suresh and will update you once I have confirmation.')],received:'Rohan’s question and the existing décor commitment.',action:'Check the latest evidence. Contact the primary vendor without creating a second recovery thread.',rule:'A stale confirmation is not current readiness.',next:'Vendor response, or the configured call timeout.',evidence:'Rohan’s message → Telegram. Vendor response → actual Gnani result in the eventual run. No response has been received in this storyboard.'},
+      {label:'Investigate',title:'Silence has a next step.',date:'11 December · Vendor check',state:'SCHEDULED_CHECK',silent:'Tarang is following up.',quiet:'The couple does not need a notification for every call attempt.',received:'Suresh did not answer. This does not yet prove he cannot fulfil the booking.',action:'Use bounded retries, then the authorised alternate contact. When the assistant confirms unavailability, record the source and inspect the backup list.',rule:'No indefinite redialling; no unsupported inference from silence.',next:'Next configured retry or alternate-contact response deadline.',evidence:'No-answer result and the assistant’s exact words must be retained. Retry count, intervals and calling windows are still open.'},
+      {label:'Find a fix',title:'Bring the option, not the chase.',date:'11 December · Backup search',state:'WAITING_FOR_EVENT',silent:'A replacement is being checked.',quiet:'Tarang checks the existing shortlist, design and timing before asking the couple to decide.',received:'The primary vendor cannot deliver. Petal Inn is on the agreed backup shortlist.',action:'Share the necessary specs; confirm availability, all-in price, terms, deadline and quote validity.',rule:'An available quote is not a confirmed booking. Do not make a binding commitment without authority.',next:'Complete quote and availability response, or its timeout.',evidence:'₹40,000 is the scenario quote. Availability, inclusions and expiry must come from the vendor; they are not established here.'},
+      {label:'Ask precisely',title:'One understandable decision.',date:'11 December · Approval proposal',state:'WAITING_FOR_APPROVAL',messages:[message('Tarang','Suresh can’t fulfil the booking. Petal Inn can deliver the agreed mandap design for ₹40,000.\n\nI recommend confirming the replacement. This is above my example ₹5,000 limit. Approve the ₹40,000 booking?')],buttons:[['Approve ₹40,000 booking','advance'],['See scope and terms','details'],['Decline this option','declined']],note:'Copy proposal. Actual card must include confirmed inclusions, setup time, quote expiry and decision deadline before it can be actionable.',received:'A complete, still-valid vendor proposal. Details must be established before sending the real card.',action:'Request a booking decision from the configured approver. Keep payment authority separate.',rule:'Above-cap commitments require exact scoped approval. Silence never authorises an action.',next:'Valid approval, decline, or configured reminder/expiry.',evidence:'Bind vendor, ₹40,000, INR, specification version, booking scope, quote validity and authorised Telegram identity. Numeric cap is still illustrative.'},
+      {label:'Secure recovery',title:'Act on the decision. Keep the boundary.',date:'11 December · After valid approval',state:'ACTION',messages:[message('Rohan','Approve ₹40,000 booking'),message('Tarang','Approved by Rohan. I’m confirming Petal Inn’s booking against the agreed plan.')],received:'An exact approval, then a ₹3,000 delivery surcharge from the vendor.',action:'Confirm the booking. Negotiate the surcharge to ₹2,500 and run a fresh authority check before payment.',rule:'The surcharge is autonomous only with existing ancillary-spend scope and enough category room. Booking approval alone does not create that grant.',next:'Payment result and vendor acknowledgement; pending results trigger reconciliation.',evidence:'The canonical no-second-approval story requires explicit ancillary delegation in setup. The ₹40,000 is committed; its payment schedule is still unspecified.'},
+      {label:'Keep watching',title:'The backup is secured. Setup is still open.',date:'After booking and surcharge verification',state:'SCHEDULED_CHECK',messages:[message('Tarang','Petal Inn is confirmed. The delivery surcharge was reduced to ₹2,500 and payment is confirmed.\n\nI’m still tracking materials, venue access and setup. The mandap isn’t marked complete yet.')],received:'Confirmed replacement booking, successful surcharge payment and vendor acknowledgement.',action:'Resolve the vendor-replacement issue. Keep the parent mandap commitment open and create fulfilment checks.',rule:'A successful booking or payment is not proof of physical setup.',next:'Agreed materials, arrival and venue setup checkpoints.',evidence:'Separate ledger entries: ₹40,000 booking commitment; ₹2,500 paid only with a successful payment result. Check original vendor deposits/cancellation separately.'},
+      {label:'Verify setup',title:'“Ready” is backed by a venue check.',date:'14 December · At the agreed setup deadline',state:'CLOSED · OUTCOME ACHIEVED',messages:[message('Tarang','The venue contact has confirmed the mandap is ready against your agreed plan.\n\nPetal Inn booking: ₹40,000. Delivery surcharge: ₹2,500 paid. Any outstanding balance or refund remains in reconciliation.')],received:'Design-matched setup confirmation from the designated venue verifier.',action:'Verify venue, specification, timing and remaining defects. Close the mandap outcome only when the evidence meets the agreed contract.',rule:'A vendor’s claim or incomplete photo alone may not satisfy setup verification.',next:'No further setup chase after verified completion. Track remaining finance separately.',evidence:'This is proposed closure copy, not proof that the mandap exists. Verifier identity, evidence method and setup deadline require confirmation.'}
+    ]
+  },
+  courier: {
+    title:'A problem handled before the couple has to ask.',
+    description:'12 December · Autonomous ₹1,200 recovery within an approved courier budget; follow all 200 hampers to the venue.',
+    steps:[
+      {label:'Notice absence',title:'The missing update is the trigger.',date:'12 December · Dispatch checkpoint',state:'ACTION',silent:'No nudge from Rohan.',quiet:'Tarang notices that expected dispatch evidence has not arrived.',received:'The dispatch expectation has passed its agreed grace period without a matching event.',action:'Wake one investigation, check for late evidence, then contact Anand Gifts.',rule:'Missing evidence means unverified dispatch. It does not prove courier failure.',next:'Vendor response deadline. Cancel the matching watchdog if valid dispatch evidence arrives.',evidence:'Example: expected 11:00 + 15-minute grace, detected on the next heartbeat. Final timing is unconfirmed; the actual run must show the clock source.'},
+      {label:'Understand failure',title:'First establish what actually happened.',date:'12 December · Anand Gifts check-in',state:'WAITING_FOR_EVENT',silent:'The shop is being contacted.',quiet:'Tarang establishes readiness and constraints before promising recovery.',received:'The shop says its regular courier is unavailable and nothing has shipped.',action:'Confirm all 200 hampers, packing, pickup address, package count, dimensions, weight and contact.',rule:'Preserve the vendor’s exact response and distinguish statements from verified facts.',next:'Complete readiness details or vendor-response timeout.',evidence:'The shop’s Jaipur location is still a scenario assumption. A recording needs a real sourced input and unchanged Gnani response.'},
+      {label:'Check feasibility',title:'A route is not a delivery promise.',date:'12 December · Logistics options',state:'WAITING_FOR_EVENT',silent:'A viable delivery option is being checked.',quiet:'Price, readiness and a supported delivery window must all line up.',received:'Ready-to-ship details and the agreed venue deadline.',action:'Check serviceability and shipment requirements. Compare delivery options against the deadline and cost.',rule:'Do not assume Delhivery offers same-day Jaipur delivery for 200 hampers at ₹1,200.',next:'Supported quote/terms or a clear feasibility failure.',evidence:'Delhivery documents shipment creation and pickup. The proposed same-day service and price need evidence. Maps travel time is not a delivery SLA.'},
+      {label:'Check authority',title:'The couple already delegated this.',date:'12 December · ₹1,200 proposal',state:'ACTION',silent:'No approval request needed.',quiet:'This courier category is already approved. Tarang checks that the specific action fits.',received:'A feasible ₹1,200 offer, known payee, valid terms and approved courier spending scope.',action:'Check the configured cap, category room and existing reservations. Reserve the obligation once.',rule:'Amount within cap + approved category + enough budget + correct scope and payee.',next:'Dispatch the permitted booking/payment operation; then verify its result.',evidence:'Om confirmed autonomous courier recovery. Total budget, remaining room and cap must be explicitly configured before a real run.'},
+      {label:'Arrange pickup',title:'Handle the work. Send the useful update.',date:'After payment and pickup confirmation',state:'WAITING_FOR_EVENT',messages:[message('Tarang','The original courier fell through. I’ve arranged replacement pickup for ₹1,200 within your courier budget.\n\nPayment is confirmed. I’m tracking the hampers through to the venue.')],received:'Verified payment, shipment record and pickup confirmation—not merely submitted requests.',action:'Follow the documented order of payment, shipment creation and pickup. Ensure labels and packaging are ready with Anand Gifts.',rule:'A pickup request is not a collected shipment. Keep payment, shipment and pickup records separate.',next:'Expected pickup event and a deadline for investigating if it does not occur.',evidence:'No escrow or pay-on-delivery capability is assumed. Exact rail payloads, funding path, payee and operation order still need verification.'},
+      {label:'Follow through',title:'Tarang keeps the delivery thread.',date:'12 December · Pickup and transit',state:'SCHEDULED_CHECK',silent:'Delivery is being followed through.',quiet:'Routine movement stays in the log. A material delay becomes an update with options.',received:'Pickup and tracking events linked to the expected packages.',action:'Monitor movement, investigate missed milestones, and ask the venue to verify receipt when delivery is reported.',rule:'Booked, picked up and in transit are all open states for the delivery outcome.',next:'Next carrier check or recipient confirmation deadline.',evidence:'200 hampers may travel in several packages. Track all shipment IDs; a single delivered package is insufficient.'},
+      {label:'Verify receipt',title:'All 200. At the venue. In good condition.',date:'12 December · After verified receipt',state:'CLOSED · OUTCOME ACHIEVED',messages:[message('Tarang','The venue contact has confirmed all 200 hampers arrived in good condition.\n\nCourier payment: ₹1,200 successful, within your approved budget. This delivery is complete.')],received:'Correlated carrier records and recipient confirmation of quantity and condition at the correct venue.',action:'Close the delivery commitment once every required package and any shortfall is accounted for.',rule:'A carrier “delivered” scan alone does not prove all 200 usable hampers arrived.',next:'No further delivery chase after evidence is sufficient. Any unresolved finance remains separate.',evidence:'Illustrative outcome only. Named recipient, receipt record, shipment IDs and successful payment proof are required in the actual run.'}
+    ]
+  },
+  exception: {
+    title:'Same recovery. A different authority boundary.',
+    description:'Exception variant only · If courier spend was never budgeted, ₹1,200 requires approval despite being below the example cap.',
+    steps:[
+      {label:'Category missing',title:'Small does not mean authorised.',date:'After the same investigation and feasibility checks',state:'WAITING_FOR_APPROVAL',messages:[message('Tarang','Your 200 hampers haven’t left Anand Gifts. The available recovery option costs ₹1,200.\n\nThis category isn’t in your approved budget. Approve this one-time courier expense?')],buttons:[['Approve this ₹1,200 expense','advance'],['See scope and terms','details'],['Decline this option','declined']],note:'Exception only. The main courier journey uses an approved budget and skips this approval.',received:'A feasible courier offer, but no courier category delegation.',action:'Propose the exact booking/payment scope, vendor/payee, price, delivery window, validity and terms.',rule:'A below-cap transaction in an unapproved category still requires explicit authority.',next:'Approval, decline or configured reminder/expiry.',evidence:'This preserves the category rule as a test variant. It does not replace Om’s confirmed autonomous courier journey.'},
+      {label:'Scoped permission',title:'Approve the rescue, not an open wallet.',date:'After a valid, scoped decision',state:'ACTION',messages:[message('Rohan','Approve this ₹1,200 expense'),message('Tarang','Approved by Rohan for this ₹1,200 courier recovery. I’m arranging it now.')],received:'An approval tied to the current exact proposal and authorised user.',action:'Consume the approval once. Revalidate terms and dispatch within scope.',rule:'One-time authority does not open a permanent courier budget. Changed price, recipient or quote requires another check.',next:'Payment, shipment and pickup reconciliation.',evidence:'Concurrent clicks and late approvals must not execute twice. This review navigation does not record actual approval.'},
+      {label:'Return to delivery',title:'The approval is a bridge back to follow-through.',date:'After the operation has been confirmed',state:'WAITING_FOR_EVENT',messages:[message('Tarang','Pickup is arranged and the ₹1,200 payment is confirmed. I’m tracking all 200 hampers through to the venue.')],received:'Successful payment and confirmed shipment/pickup records.',action:'Resume the same tracking and venue-verification loop as the canonical courier journey.',rule:'Approval and payment are intermediate steps, not completion.',next:'Pickup, transit checks and recipient confirmation.',evidence:'Use the courier journey’s “Follow through” and “Verify receipt” steps for the remaining experience.'}
+    ]
+  },
+  setup: {
+    title:'Agree what matters before Tarang starts watching.',
+    description:'Proposed onboarding · Four short review cards before either recovery journey. Inputs remain drafts until checked.',
+    steps:[
+      {label:'Our wedding',title:'Begin with people and context.',date:'Day one · Before the recorded recovery',state:'WAITING_FOR_EVENT',messages:[message('Tarang','Let’s set up your wedding plan. I have Meera & Rohan, Jaipur, 14 December 2026.\n\nPlease review the venue, key contacts and local timings before I use them.')],received:'Couple-provided date, venue, contacts and planning materials.',action:'Capture source and confidence; resolve conflicting details; verify identities before granting access.',rule:'Imported facts are draft context. They do not establish spending authority.',next:'Couple reviews the wedding details.',evidence:'Prototype channel is Telegram. Private chats versus a shared group is still undecided. No access to arbitrary personal WhatsApp chats is assumed.'},
+      {label:'What must happen',title:'Capture promises, not a loose checklist.',date:'Day one · Plan review',state:'WAITING_FOR_EVENT',messages:[message('Tarang','Here are the outcomes I’ll watch:\n\n• Mandap ready against the agreed design.\n• All 200 return-gift hampers at the venue.\n\nFor each, let’s confirm the owner, deadline, checkpoints and who verifies completion.')],received:'Vendor promises, invoices and the couple’s confirmed event plan.',action:'Create commitments with outcome, dependencies, next check and evidence criteria. Keep unknowns visible.',rule:'An incomplete commitment is “Needs setup”; it must not appear actively monitored.',next:'Confirmation of missing deadlines, supplier details or verifier.',evidence:'Chat exports and documents can be uploaded deliberately. Extraction must retain source references and ask about contradictions.'},
+      {label:'Set authority',title:'Make delegation understandable.',date:'Day one · Authority review',state:'WAITING_FOR_APPROVAL',messages:[message('Tarang','Review what I can decide:\n\n• Approved categories and remaining budgets.\n• Your per-transaction limit.\n• Who can approve exceptions.\n• What I may book, negotiate or change.\n\nNothing outside these limits happens without the right approval.')],received:'Explicit couple-defined authority, not inferred consent from documents.',action:'Configure categories, ceilings, scope, approvers, revocation and quote rules. Show a worked example before activation.',rule:'₹5,000 is illustrative here. Courier category is approved in principle; numeric budget and ancillary décor scope still need values.',next:'Exact authority record confirmed by the authorised people.',evidence:'Approving the ₹40,000 replacement later does not silently delegate every future décor charge.'},
+      {label:'Start monitoring',title:'Know what happens next—and how to stop.',date:'Day one · Activation review',state:'SCHEDULED_CHECK',messages:[message('Tarang','I’m ready to watch the mandap setup and the 200 hampers once your plan and authority are confirmed.\n\nYou can ask “What needs me?” or “What happens next?” at any time. You can also pause new actions or take over a specific commitment.')],received:'Confirmed outcomes, budgets, contact permissions, check schedules and escalation preferences.',action:'Show actual next checkpoints and activate only fully configured commitments. Persist the schedule before acknowledging monitoring.',rule:'No missing retry/approval policy at activation. A pause does not reverse operations already in flight.',next:'The earliest confirmed check or an incoming event.',evidence:'Onboarding belongs before the competition recovery recording. Activation shown here is a proposal, not a running monitor.'}
+    ]
+  }
+};
+
+const failures = {
+  silence:{label:'Vendor stays unreachable',title:'No infinite redial loop.',state:'SCHEDULED_CHECK',messages:[message('Tarang','I haven’t reached the vendor. I’m checking the agreed alternate contacts and backup options.')],received:'The configured response window and permitted attempts have been exhausted.',action:'Stop the primary contact loop. Try the authorised alternate or backup; assess remaining time and notify only if useful.',rule:'Urgency does not authorise unlimited calls or an unapproved substitute.',next:'Alternate-contact deadline, or a named human decision if no permitted option remains.',evidence:'Calling windows, retry cap, spacing and contact ladder are still open policy choices.'},
+  no_reply:{label:'Approval gets no reply',title:'Silence does not become permission.',state:'WAITING_FOR_APPROVAL',messages:[message('Tarang','This option needs your decision before the quote expires. I haven’t confirmed or paid it.\n\nIf it expires, I’ll recheck availability before proceeding.')],received:'The approval reminder is due and the proposal is still pending.',action:'Send only the configured reminder. Expire the proposal on deadline; inspect alternatives and pre-authorised escalation routes.',rule:'Never spend on silence. A stale button cannot revive an expired offer.',next:'Decision or expiry; after expiry, renewed option search with its own checkpoint.',evidence:'The actual request must state a sourced expiry time. Reminder interval, maximum reminders and fallback approver need configuration.'},
+  declined:{label:'The couple declines',title:'Reject an option without dropping the outcome.',state:'ACTION',messages:[message('Tarang','I won’t confirm this option. I’ll check the remaining permitted choices and come back with a recommendation.')],received:'An authorised person declines this exact proposal.',action:'Close the proposal, cancel its reminder and prevent its execution. Resume option search within existing limits.',rule:'Declining a proposal does not cancel the wedding commitment or authorise another vendor.',next:'Alternative response deadline, or an explicit handoff when no feasible options remain.',evidence:'Record the declining actor and proposal version. Release reservations only when obligations are confirmed absent.'},
+  pending:{label:'Payment result is unknown',title:'Check the payment. Don’t pay twice.',state:'SCHEDULED_CHECK',messages:[message('Tarang','The payment hasn’t been confirmed yet. I’m checking the existing transaction before taking another payment action.')],received:'A payment request timed out or returned a pending state.',action:'Retain the same operation identity and budget reservation. Reconcile with the rail; follow up before the booking deadline.',rule:'A timeout is not a failed payment. No fresh payout while the original result is unknown.',next:'Existing transaction status check and the vendor hold/booking deadline.',evidence:'Retry only after documented status and idempotency semantics establish it is safe. Exact partner payloads are not yet validated.'},
+  disputed:{label:'Completion proof is missing',title:'Reported complete. Still being verified.',state:'WAITING_FOR_EVENT',messages:[message('Tarang','The supplier reports completion, but the venue verification is incomplete. I’m checking what is still missing before marking this done.')],received:'A supplier or carrier completion claim conflicts with, or lacks, venue confirmation.',action:'Preserve both accounts. Correlate references and ask the designated verifier about actual quantity, condition or setup specification.',rule:'A claim cannot erase contradictory evidence. Keep any shortfall open.',next:'Venue verification deadline, then remediation or explicit human decision.',evidence:'For hampers: all 200 in acceptable condition at the correct venue. For décor: agreed design and setup deadline verified.'},
+  unavailable:{label:'No feasible delivery option',title:'Protect the truth of the promise.',state:'ACTION',messages:[message('Tarang','I can’t confirm a delivery option that meets the current deadline. I’m checking the permitted alternatives and will show you the choices and trade-offs.')],received:'No supported option meets the route, package or deadline requirements.',action:'Inspect approved alternatives and factual constraints. If none can recover the outcome, state the impact and ask for a decision.',rule:'Do not invent same-day service, a quote or a successful booking to preserve the storyline.',next:'Alternative availability check or a time-bounded human decision.',evidence:'Route ETA is not a delivery guarantee. Proposed service, origin and package details remain unverified.'},
+  restart:{label:'The agent restarts',title:'Resume the responsibility, not the side effects.',state:'SCHEDULED_CHECK',silent:'The follow-up survives.',quiet:'The couple should not receive duplicate approvals or have to repeat the request.',received:'Worker restart with persisted commitments, operation IDs and due jobs.',action:'Recover jobs, reconcile unknown external results, and resume only work that is still necessary.',rule:'A restarted worker must not duplicate a payout, booking, call or approval request.',next:'Earliest still-valid outstanding observation; urgent overdue work is prioritised.',evidence:'Persistence, outbox handling and idempotency are proposed architecture. None is implemented by this HTML review.'}
+};
+const variants = {
+  decor:['silence','no_reply','declined','pending','disputed','restart'],
+  courier:['silence','pending','unavailable','disputed','restart'],
+  exception:['no_reply','declined','pending','disputed','restart'],
+  setup:[]
+};
+const failureStep = {
+  decor:{silence:1,no_reply:3,declined:3,pending:4,disputed:6,restart:5},
+  courier:{silence:1,pending:4,unavailable:2,disputed:6,restart:5},
+  exception:{no_reply:0,declined:0,pending:1,disputed:2,restart:2},
+  setup:{}
+};
+let scenario = 'decor';
+let index = 0;
+let branch = 'main';
+const $ = id => document.getElementById(id);
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+function resetVariants() {
+  $('variation').replaceChildren(new Option('As designed','main'));
+  variants[scenario].forEach(key => $('variation').add(new Option(failures[key].label,key)));
+  $('variation').disabled = variants[scenario].length === 0;
+}
+function render() {
+  const journey = scenes[scenario];
+  const base = journey.steps[index];
+  const scene = branch === 'main' ? base : {...failures[branch],date:'Exception review · illustrative',label:failures[branch].label};
+  $('journey-title').textContent = journey.title;
+  $('journey-description').textContent = journey.description;
+  document.querySelectorAll('[data-scenario]').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.scenario === scenario)));
+  $('variation').value = branch;
+  const stepList = $('step-list');
+  stepList.replaceChildren();
+  journey.steps.forEach((step,i) => {
+    const li = element('li');
+    const button = element('button');
+    button.type = 'button';
+    button.append(element('span','step-num',String(i+1).padStart(2,'0')),element('span','',step.label));
+    if (i === index) button.setAttribute('aria-current','step');
+    button.addEventListener('click',() => { index=i; branch='main'; render(); stepList.children[i].querySelector('button').focus({preventScroll:true}); });
+    li.append(button); stepList.append(li);
+  });
+  const chat = $('chat');
+  chat.replaceChildren(element('div','date',scene.date));
+  if (scene.messages) {
+    scene.messages.forEach(item => {
+      const bubble = element('div',item.from === 'Tarang' ? 'bubble' : 'bubble user');
+      bubble.append(element('span','sender',item.from),document.createTextNode(item.text));
+      chat.append(bubble);
+    });
+  } else {
+    const quiet = element('div','silent');
+    quiet.append(element('div','','◌'),element('strong','',scene.silent),element('p','',scene.quiet));
+    chat.append(quiet);
+  }
+  if (scene.buttons) {
+    const group = element('div','mock-actions');
+    group.setAttribute('aria-label','Preview actions only');
+    scene.buttons.forEach(([label,action]) => {
+      const button = element('button','',label);
+      button.type = 'button';
+      button.addEventListener('click',() => {
+        if (action === 'details') {
+          $('evidence-details').open = true;
+          $('evidence-details').querySelector('summary').focus({preventScroll:true});
+        } else {
+          if (action === 'advance') index = Math.min(index+1,journey.steps.length-1);
+          else branch = action;
+          render();
+          $('scene-title').focus({preventScroll:true});
+        }
+      });
+      group.append(button);
+    });
+    chat.append(group,element('p','chat-note','Preview controls only. Clicking changes this storyboard; it grants no real authority.'));
+  }
+  if (scene.note) chat.append(element('p','chat-note',scene.note));
+  const backstage = $('backstage');
+  const topline = element('div','stage-label');
+  topline.append(element('span','','Behind the conversation'),element('span','',branch === 'main' ? 'Design proposal' : 'Exception path'));
+  const title = element('h3','scene-title',scene.title);
+  title.id = 'scene-title'; title.tabIndex = -1;
+  const state = element('span','state' + (scene.state.includes('APPROVAL') ? ' attention' : ''),scene.state);
+  const dl = element('dl');
+  [['What arrived',scene.received],['What Tarang does',scene.action],['The boundary',scene.rule]].forEach(([term,value]) => dl.append(element('dt','',term),element('dd','',value)));
+  const next = element('div','next');
+  next.append(element('b','','Next observation →'),element('p','',scene.next));
+  const detail = element('details'); detail.id = 'evidence-details';
+  detail.append(element('summary','','Evidence, scope & open details'),element('p','',scene.evidence));
+  backstage.replaceChildren(topline,title,state,dl,next,detail);
+  $('position').textContent = branch === 'main' ? `Moment ${index+1} of ${journey.steps.length} · ${base.label}` : `Exception: ${failures[branch].label} · Return to the journey to continue`;
+  $('previous').disabled = branch === 'main' && index === 0;
+  $('next').disabled = branch === 'main' && index === journey.steps.length-1;
+  $('next').textContent = branch === 'main' ? 'Next moment →' : 'Return to journey →';
+  $('announcement').textContent = `${journey.title} ${branch === 'main' ? `Moment ${index+1}.` : 'Exception path.'} ${scene.title}`;
+}
+document.querySelectorAll('[data-scenario]').forEach(button => button.addEventListener('click',() => {scenario=button.dataset.scenario;index=0;branch='main';resetVariants();render();}));
+$('variation').addEventListener('change',event => {branch=event.target.value;if(branch !== 'main') index=failureStep[scenario][branch];render();});
+$('previous').addEventListener('click',() => {if(branch !== 'main') branch='main';else index=Math.max(0,index-1);render();});
+$('next').addEventListener('click',() => {if(branch !== 'main') branch='main';else index=Math.min(scenes[scenario].steps.length-1,index+1);render();});
+resetVariants();
+render();
+</script>
+</body>
+</html>
