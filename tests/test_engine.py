@@ -310,3 +310,39 @@ def test_api_auth_webhook_and_budget(env):
         ).status_code
         == 409
     )
+
+
+def test_new_model_key_cannot_duplicate_successful_payment(env):
+    budget(env)
+    env.model.decision = decision(operation())
+    env.ingest(update())
+    step(env)
+    env.add_evidence(
+        EvidenceInput(
+            commitment_id=1,
+            operation_id=1,
+            source="fixture receipt",
+            mode="illustrative-fixture",
+            content="Paid",
+            result="succeeded",
+        )
+    )
+    env.model.decision = decision(operation("fresh-key"))
+    step(env)
+    assert len(ops(env)) == 1
+
+
+def test_operator_scheduled_check_is_authenticated(env):
+    app = create_app(env.settings, env.model, env.telegram, run_worker=False)
+    client = TestClient(app)
+    env.ingest(update())
+    step(env)
+    body = {"commitment_id": 1, "delay_seconds": 30}
+    assert client.post("/api/check", json=body).status_code == 401
+    assert (
+        client.post(
+            "/api/check", json=body, headers={"Authorization": "Bearer test-token"}
+        ).status_code
+        == 200
+    )
+    assert env.store.snapshot()["commitments"][0]["next_check"] <= time.time() + 31

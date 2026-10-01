@@ -2,6 +2,7 @@ import asyncio
 import hmac
 import fcntl
 import json
+import time
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from fastapi import FastAPI, Header, HTTPException, Request
@@ -10,7 +11,7 @@ from .config import Settings
 from .store import Store
 from .adapters import OpenRouter, Telegram
 from .engine import Engine
-from .schema import EvidenceInput, BudgetInput
+from .schema import EvidenceInput, BudgetInput, CheckInput
 
 
 def create_app(settings=None, model=None, telegram=None, run_worker=True):
@@ -185,6 +186,28 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
             return {"id": engine.add_evidence(body)}
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
+
+    @app.post("/api/check")
+    def check(body: CheckInput, authorization: str = Header(default="")):
+        authorised(authorization)
+        due = time.time() + body.delay_seconds
+        with store.tx() as db:
+            c = db.execute(
+                "SELECT * FROM commitments WHERE id=?", (body.commitment_id,)
+            ).fetchone()
+            if not c or c["state"] != "open" or c["paused"]:
+                raise HTTPException(409, "An open, unpaused commitment is required")
+            db.execute(
+                "UPDATE commitments SET next_check=? WHERE id=?",
+                (due, body.commitment_id),
+            )
+            Store.log(
+                db,
+                body.commitment_id,
+                "operator_requested_check",
+                {"due": due, "delay_seconds": body.delay_seconds},
+            )
+        return {"due": due}
 
     @app.put("/api/budget")
     def budget(body: BudgetInput, authorization: str = Header(default="")):

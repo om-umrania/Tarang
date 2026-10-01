@@ -49,3 +49,8 @@ class BudgetInput(Strict):
     recipient: str = Field(min_length=1, max_length=200)
     kind: Literal["payment", "booking", "shipment"]
     scope: str = Field(min_length=1, max_length=2000)
+
+
+class CheckInput(Strict):
+    commitment_id: int
+    delay_seconds: int = Field(ge=30, le=86400)

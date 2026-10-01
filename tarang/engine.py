@@ -1,5 +1,6 @@
 import json
 import time
+from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 from .store import Store
 
@@ -220,6 +221,13 @@ class Engine:
                     )
                 ],
                 "budgets": [dict(r) for r in db.execute("SELECT * FROM budgets")],
+                "recent_sent_messages": [
+                    json.loads(r["payload"])["text"]
+                    for r in db.execute(
+                        "SELECT payload FROM outbox WHERE chat=? AND state='sent' ORDER BY id DESC LIMIT 5",
+                        (c["chat"],),
+                    )
+                ],
                 "recent_events": [
                     dict(r)
                     for r in db.execute(
@@ -310,6 +318,26 @@ class Engine:
                     "SELECT * FROM operations WHERE commitment=? AND key=?",
                     (c["id"], op.key),
                 ).fetchone()
+                if not old and op.amount_paise > 0:
+                    # Model-generated keys are not trustworthy idempotency evidence.
+                    # Match the actual financial intent as well as the key.
+                    for previous in db.execute(
+                        "SELECT * FROM operations WHERE commitment=? AND amount>0",
+                        (c["id"],),
+                    ):
+                        proposal = json.loads(previous["proposal"])
+                        fields = (
+                            "kind",
+                            "recipient",
+                            "category",
+                            "amount_paise",
+                            "specification",
+                        )
+                        if all(
+                            proposal[field] == getattr(op, field) for field in fields
+                        ):
+                            old = previous
+                            break
                 if old:
                     notes.append(
                         f"Operation #{old['id']} already exists ({old['state']}); no duplicate request created."
@@ -424,7 +452,9 @@ class Engine:
                 if notes:
                     text += "\n\n" + "\n".join(notes)
                 if state == "open":
-                    text += f'\n\nNext check saved: {datetime.fromtimestamp(now+d.next_check_seconds,timezone.utc).strftime("%d %b %H:%M:%S UTC")}. '
+                    text += f'\n\nNext check saved: {datetime.fromtimestamp(now+d.next_check_seconds,ZoneInfo(self.settings.timezone)).strftime("%d %b %H:%M:%S %Z")}. '
+                if self.settings.free_host and state == "open":
+                    text += "Free-host checks may run late if the service is asleep."
                 Store.message(
                     db, f"event:{event['id']}", c["chat"], text[:4096], buttons
                 )

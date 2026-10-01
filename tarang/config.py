@@ -28,6 +28,8 @@ class Settings:
     model: str = field(
         default_factory=lambda: os.getenv("MODEL", "google/gemini-3.8-flash")
     )
+    timezone: str = field(default_factory=lambda: os.getenv("TIMEZONE", "Asia/Kolkata"))
+    free_host: bool = field(default_factory=lambda: os.getenv("RENDER") == "true")
     telegram_mode: str = field(
         default_factory=lambda: os.getenv("TELEGRAM_MODE", "polling")
     )
