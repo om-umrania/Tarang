@@ -9,8 +9,8 @@ for the actual simulation and evidence requirements.
 
 | Surface | Implemented path | Evidence still needed |
 |---|---|---|
-| Telegram | Live Bot API ingestion, private-chat allowlist, replies, exact approval callbacks | Hosted round trip and restart check |
-| Model | OpenRouter structured JSON with configurable Gemini Flash model | Scenario evaluations, not just greeting smoke |
+| Telegram | Live Bot API ingestion, private-chat allowlist, replies, exact approval callbacks | Hosted round trip and redeploy persistence verified; see handoff |
+| Model | OpenRouter structured JSON; Gemini Flash candidate plus tested temporary free Nemotron default | Scenario evaluations, not just greeting smoke |
 | Gnani | Runnable STT adapter: `python -m tarang.gnani`; exact request metadata, audio hash, HTTP status and response saved to operator evidence | GNANI_API_KEY and an authorised ≤60-second source audio clip; no live Gnani call completed yet |
 | Pine Labs | Operator-approved payment request and provenance-labelled result ingestion | Appropriate payout/authorisation product, exact API contract, supported beneficiary/funding and documented response |
 | Delhivery | Operator shipment/tracking request and provenance-labelled result ingestion | Serviceability, origin, package count/dimensions, SLA, exact shipment/pickup/tracking contract |

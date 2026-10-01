@@ -9,7 +9,7 @@ source material, a proposed experience design, and a static review walkthrough.
 The walkthrough is not an agent, a Telegram connection, or execution evidence.
 
 Phase 3 implementation is now explicitly authorised. Python/FastAPI, OpenRouter
-Gemini Flash, Telegram and free Render/PostgreSQL are the current prototype stack.
+a configurable model, Telegram and free Render/PostgreSQL are the current prototype stack.
 Read docs/RUNTIME.md and docs/RAILS.md for actual integration boundaries. Read
 `docs/PERSONA.md`, `prompts/tarang-persona.md`, `docs/PERSONA_EVALS.md` and
 `docs/PHASE_2.md` when continuing this phase. Persona proposals are not confirmed

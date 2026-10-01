@@ -1,4 +1,4 @@
-> Runtime update: four separate live synthetic probes have passed via OpenRouter. The full 15-case rubric below remains unexecuted; see [handoff](HANDOFF.md).
+> Runtime update: four separate live synthetic probes have passed on both Gemini Flash and the temporary free Nemotron model via OpenRouter. The full 15-case rubric below remains unexecuted; see [handoff](HANDOFF.md).
 
 # Persona evaluation cases · draft
 

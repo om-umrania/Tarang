@@ -20,9 +20,11 @@
   pause, physical-outcome closure, unknown sends and restart.
 - Static review JS/local links and whitespace checks pass.
 - OpenRouter live greeting and incomplete-delivery probes worked.
-- Four additional synthetic model probes passed: short delivery, vendor injection,
+- Four additional synthetic Gemini model probes passed: short delivery, vendor injection,
   first greeting and payment timeout. Outputs are saved privately in
-  `.runtime/model-evaluation.json`; they are not real rail evidence or the full
+  `.runtime/model-evaluation-gemini.json`. The same four probes also passed on
+  the temporary free Nemotron model, in `.runtime/model-evaluation.json`.
+  These are not real rail evidence or the full
   15-case persona evaluation. Transient local transport failures needed retries.
 - Real Telegram `/start` updates reached the deployed model; two replies were
   acknowledged by Telegram and recorded as sent. Webhook queue was zero with no
@@ -35,7 +37,13 @@
   dispatch and retry persistence are verified; successful scheduled model follow-up
   is **not yet verified**. The fixed-synthetic hosted diagnostic identifies **model_http_402**: OpenRouter
   currently blocks the paid model for credit/payment reasons. Key validation
-  succeeds; the free Nemotron candidate is being configured as the temporary route.
+  succeeds; the temporary free Nemotron route is now deployed. Its hosted fixed-synthetic
+  diagnostic returned `ok: true` and `schema_valid: true`. A successful unattended
+  model-driven follow-up on that route still needs its own hosted verification.
+- An isolated local synthetic commitment completed a real 30-second clock → live
+  free-model → persisted decision cycle without user input. No Telegram messages
+  were sent by this test. Result: `.runtime/live-clock-test.json`. This closes the
+  local scheduler/model integration check, not the full hosted unattended test.
 
 ## Boundaries and remaining work
 

@@ -122,7 +122,7 @@ model after a successful structured-output and incomplete-delivery smoke test;
 this is a candidate choice, not a completed comparative benchmark. Subsequent
 hosted calls returned HTTP 402: model credits/fallback selection need resolution
 (see handoff), even though the key itself validates. A tested free Nemotron
-candidate is the temporary MODEL default; free provider capacity/rate limits
+candidate is the temporary MODEL default and its hosted synthetic check passed; free provider capacity/rate limits
 can still interrupt requests.
 
 After deployment, verify health, a real Telegram turn, an unattended due check
