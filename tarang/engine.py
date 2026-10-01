@@ -291,6 +291,38 @@ class Engine:
             if current["paused"] or current["state"] != "open":
                 db.execute("UPDATE events SET status='held' WHERE id=?", (event["id"],))
                 return
+            source_text = (
+                json.loads(event["payload"]).get("message", {}).get("text", "")
+            )
+            if event[
+                "source"
+            ] == "telegram" and source_text.lstrip().upper().startswith(
+                ("TEST ONLY:", "E2E TEST")
+            ):
+                Store.log(
+                    db,
+                    c["id"],
+                    "test_decision",
+                    {
+                        "event_id": event["id"],
+                        "decision": d.model_dump(),
+                        "effects_suppressed": True,
+                    },
+                )
+                text = (
+                    d.message
+                    if not (d.operation or d.close_with_evidence)
+                    else "The model proposed an action during this test. It was blocked; no real operation or closure was applied."
+                )
+                Store.message(
+                    db,
+                    f"event:{event['id']}",
+                    c["chat"],
+                    "[Test only — real commitment and schedule unchanged]\n"
+                    + (text or "Test processed.")[:3900],
+                )
+                db.execute("UPDATE events SET status='done' WHERE id=?", (event["id"],))
+                return
             notes = []
             buttons = None
             state = "open"

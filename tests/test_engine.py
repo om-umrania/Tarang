@@ -402,3 +402,18 @@ def test_declined_proposal_cannot_be_replayed_under_new_key(env):
     env.model.decision = decision(operation("different-key"))
     step(env)
     assert len(ops(env)) == 1 and ops(env)[0]["state"] == "rejected"
+
+
+@pytest.mark.parametrize("prefix", ["TEST ONLY:", "E2E TEST —"])
+def test_labelled_rehearsal_cannot_mutate_real_commitment_or_spend(env, prefix):
+    budget(env)
+    env.ingest(update(text=prefix + " synthetic wedding date scenario"))
+    before = env.store.snapshot()["commitments"][0]
+    env.model.decision = decision(operation(), close=[999])
+    step(env)
+    after = env.store.snapshot()
+    assert after["commitments"][0] == before
+    assert after["operations"] == []
+    assert after["events"][0]["status"] == "done"
+    assert "Test only" in after["outbox"][0]["payload"]
+    assert any(x["kind"] == "test_decision" for x in after["ledger"])

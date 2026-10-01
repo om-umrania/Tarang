@@ -139,3 +139,11 @@ See [WHATSAPP.md](WHATSAPP.md) for the receive-only adapter, scoped routes, webh
 configuration and limitations. Intake defaults to disabled. Existing groups, voice
 notes and historical chats are not connected. Source-quoted possible conflicts appear
 in the operator console; live WhatsApp delivery remains unverified.
+
+## Safe labelled chat tests
+
+Prefix synthetic Telegram messages with `TEST ONLY:` or `E2E TEST`. The runtime
+records the model result and replies with a test label, but preserves the existing
+commitment, next check and authority. It suppresses operation/closure proposals.
+This does not pause other scheduled real work; use an isolated database for a fully
+separate rehearsal. See END_TO_END_TESTING.md for actual verification evidence.
