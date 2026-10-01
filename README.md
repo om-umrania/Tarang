@@ -1,11 +1,19 @@
+# Tarang Python prototype
+
+The Python agent is implemented with Telegram, OpenRouter, persistent jobs, scoped approvals and an authenticated operator workspace. Start with [Runtime setup](docs/RUNTIME.md) and [rail integration status](docs/RAILS.md). Hosted verification is recorded in [Handoff](docs/HANDOFF.md).
+
 # Tarang
 
 The wedding companion that keeps following through.
 
-**Current stage: experience design.** Both recovery journeys are being designed
-before agent implementation. Telegram is confirmed for the working prototype.
+**Current stage: persona and Python architecture iteration.** Both recovery
+journeys have review designs. Telegram and Python are confirmed for the working
+prototype; Render or Vercel will host the agent, with provider selection still open.
 
-- [Open the interactive experience review](docs/experience-review.html)
+- [Persona v0.1](docs/PERSONA.md) · [Prompt](prompts/tarang-persona.md) · [Evaluation cases](docs/PERSONA_EVALS.md)
+- [Phase 2: Python foundation and hosting](docs/PHASE_2.md)
+
+- [Open the interactive experience review](docs/index.html)
 - [Read the complete journey design](docs/EXPERIENCE_DESIGN.md)
 - [Confirmed decisions and open choices](docs/DECISIONS.md)
 - [Proposed automation architecture](docs/ARCHITECTURE.md)
@@ -18,13 +26,13 @@ preserved in `resources/`.
 
 ## Preview
 
-Open `docs/experience-review.html` in a browser, or run:
+Open `docs/index.html` in a browser, or run:
 
 ```bash
 python3 -m http.server 8765 --bind 127.0.0.1 --directory docs
 ```
 
-Then visit `http://127.0.0.1:8765/experience-review.html`.
+Then visit `http://127.0.0.1:8765/index.html`.
 
 ## Validate
 

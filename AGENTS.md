@@ -8,6 +8,13 @@ confirmed **Telegram for the working prototype**. This repo currently contains
 source material, a proposed experience design, and a static review walkthrough.
 The walkthrough is not an agent, a Telegram connection, or execution evidence.
 
+Phase 3 implementation is now explicitly authorised. Python/FastAPI, OpenRouter
+Gemini Flash, Telegram and free Render/PostgreSQL are the current prototype stack.
+Read docs/RUNTIME.md and docs/RAILS.md for actual integration boundaries. Read
+`docs/PERSONA.md`, `prompts/tarang-persona.md`, `docs/PERSONA_EVALS.md` and
+`docs/PHASE_2.md` when continuing this phase. Persona proposals are not confirmed
+voice preferences; authored evaluation cases are not executed model tests.
+
 ## Read first
 
 1. `docs/DECISIONS.md`: explicit user decisions and unresolved choices.
@@ -21,7 +28,7 @@ do not silently promote their assumptions into accepted requirements.
 
 ## Rules
 
-- Keep current work at design scope until implementation is requested.
+- Implementation and prototype deployment are now requested; preserve source provenance.
 - Preserve original source materials. Record decisions separately.
 - No invented endpoints, API results, delivery guarantees, payment receipts,
   customer research, or completion evidence.
@@ -29,13 +36,14 @@ do not silently promote their assumptions into accepted requirements.
 - LLM proposes actions; deterministic code must enforce authority and closure.
 - Every unresolved commitment must have an owner and next observation.
 - A booking, payment submission, or carrier status alone may not prove the target outcome.
-- Do not send messages, call vendors, pay, book, or deploy from this design review.
+- Prototype bot messages are authorised. Real vendor calls, payments and bookings
+  still require configured access and exact authority; no live financial adapters exist.
 - Never expose credentials or commit `.env` files.
 - Keep the static review dependency-free and usable without network access.
 
 ## Review and validation
 
-Open `docs/experience-review.html` locally, or serve `docs/` on loopback:
+Open `docs/index.html` locally, or serve `docs/` on loopback:
 
 ```bash
 python3 -m http.server 8765 --bind 127.0.0.1 --directory docs
@@ -44,4 +52,4 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory docs
 
 Check links, JavaScript syntax, journey navigation, branches, keyboard access,
 and a narrow viewport. Report static checks separately from agent/integration
-tests; none of the latter exist yet. Preserve unrelated user changes.
+tests; run `python3 -m pytest -q` for the implemented runtime. Preserve unrelated user changes.

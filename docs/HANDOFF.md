@@ -2,6 +2,12 @@
 
 ## Current State
 
+Phase 2 now has a proposed persona, full/short prompt and 15 synthetic evaluation
+cases. These have not been run against a model. Python is confirmed; Render and
+Vercel are hosting candidates. Render is recommended for the worker architecture,
+but no provider/tier/database/model is selected and nothing is deployed.
+Start with `docs/PERSONA.md` and `docs/PHASE_2.md` for this iteration.
+
 Experience design completed on 1 October 2026 for review. Om requested both
 journeys be designed before implementation, confirmed Telegram for the prototype,
 and chose autonomous ₹1,200 courier recovery within an approved category budget.
@@ -18,7 +24,7 @@ The numeric spending cap remains configurable; ₹5,000 is illustrative.
 
 ## Important Files
 
-- `docs/experience-review.html`: standalone review, no external dependencies.
+- `docs/index.html`: standalone review, no external dependencies.
 - `docs/EXPERIENCE_DESIGN.md`: full journeys, vendor scripts and failure handling.
 - `docs/DECISIONS.md`: confirmed decisions versus proposals and unknowns.
 - `docs/ARCHITECTURE.md`: proposed persistence, policy, operations and evidence.
@@ -26,7 +32,7 @@ The numeric spending cap remains configurable; ₹5,000 is illustrative.
 
 ## How To Run
 
-Open `docs/experience-review.html` directly, or serve `docs/` on loopback with
+Open `docs/index.html` directly, or serve `docs/` on loopback with
 the command in README. The review tab was left open in Codex. The preview server
 was started on port 8765 for this session; restart it if that process ends.
 
@@ -56,8 +62,9 @@ Recovery, physical fulfilment and financial reconciliation are separate outcomes
 
 ## Next Steps
 
-Review the conversations and authority variants with Om, resolve the dependent
-choices, then implement the smallest complete model-driven commitment loop.
+Review the persona relationship/language and representative copy with Om, select
+the model and run the evaluation cases, resolve dependent authority/hosting
+choices, then implement the smallest complete Python commitment loop.
 Do not implement a fixed sequence of storyboard actions as the agent.
 
 ## Notes For Future Codex Sessions

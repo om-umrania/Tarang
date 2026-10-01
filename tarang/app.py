@@ -1,0 +1,222 @@
+import asyncio
+import hmac
+import fcntl
+import json
+from contextlib import asynccontextmanager, suppress
+from pathlib import Path
+from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from .config import Settings
+from .store import Store
+from .adapters import OpenRouter, Telegram
+from .engine import Engine
+from .schema import EvidenceInput, BudgetInput
+
+
+def create_app(settings=None, model=None, telegram=None, run_worker=True):
+    settings = settings or Settings()
+    store = Store(settings.database)
+    telegram = telegram or Telegram(settings.bot_token)
+    engine = Engine(store, settings, model or OpenRouter(settings), telegram)
+
+    async def worker():
+        engine.recover()
+        while True:
+            try:
+                await engine.step()
+                await engine.send_one()
+            except Exception as exc:
+                with store.tx() as db:
+                    Store.log(db, None, "worker_error", {"type": type(exc).__name__})
+            await asyncio.sleep(1)
+
+    async def poll():
+        while True:
+            try:
+                with store.tx() as db:
+                    row = db.execute(
+                        "SELECT value FROM metadata WHERE key='telegram_offset'"
+                    ).fetchone()
+                updates = await telegram.call(
+                    "getUpdates",
+                    {
+                        "offset": int(row["value"]) if row else 0,
+                        "timeout": 25,
+                        "allowed_updates": ["message", "callback_query"],
+                    },
+                )
+                for update in updates:
+                    engine.ingest(update)
+                    if "callback_query" in update:
+                        await telegram.call(
+                            "answerCallbackQuery",
+                            {
+                                "callback_query_id": update["callback_query"]["id"],
+                                "text": "Received; checking this proposal.",
+                            },
+                        )
+                    with store.tx() as db:
+                        db.execute(
+                            "INSERT INTO metadata(key,value) VALUES('telegram_offset',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+                            (str(update["update_id"] + 1),),
+                        )
+            except Exception:
+                await asyncio.sleep(5)
+
+    async def lead_worker():
+        if not store.postgres:
+            await worker()
+            return
+        import psycopg
+
+        # During Render rolling deploys the new process waits for the old leader.
+        # HTTP health can succeed before leadership transfers.
+        while True:
+            connection = None
+            try:
+                connection = psycopg.connect(settings.database, autocommit=True)
+                acquired = connection.execute(
+                    "SELECT pg_try_advisory_lock(7349282)"
+                ).fetchone()[0]
+                if acquired:
+                    engine.recover()
+                    while True:
+                        connection.execute("SELECT 1")
+                        await engine.step()
+                        await engine.send_one()
+                        await asyncio.sleep(1)
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                pass
+            finally:
+                if connection:
+                    connection.close()
+            await asyncio.sleep(3)
+
+    @asynccontextmanager
+    async def lifespan(app):
+        tasks = []
+        lock = None
+        if run_worker:
+            if not store.postgres:
+                lock = open(settings.database + ".worker.lock", "a")
+                try:
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    lock.close()
+                    raise RuntimeError(
+                        "Only one worker may use this database"
+                    ) from None
+            tasks.append(asyncio.create_task(lead_worker()))
+            if settings.telegram_mode == "polling" and settings.bot_token:
+                tasks.append(asyncio.create_task(poll()))
+        yield
+        for task in tasks:
+            task.cancel()
+        for task in tasks:
+            with suppress(asyncio.CancelledError):
+                await task
+        if lock:
+            lock.close()
+
+    app = FastAPI(
+        title="Tarang prototype",
+        lifespan=lifespan,
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+    )
+    app.state.engine = engine
+
+    def authorised(value):
+        if not settings.operator_token or not hmac.compare_digest(
+            value or "", f"Bearer {settings.operator_token}"
+        ):
+            raise HTTPException(401, "Operator authentication required")
+
+    @app.get("/health")
+    def health():
+        with store.tx() as db:
+            db.execute("SELECT 1")
+        return {"status": "ok", "prototype": True}
+
+    @app.get("/", response_class=HTMLResponse)
+    def console():
+        return (Path(__file__).parent / "console.html").read_text()
+
+    @app.post("/telegram/webhook")
+    async def webhook(
+        request: Request, x_telegram_bot_api_secret_token: str = Header(default="")
+    ):
+        if (
+            settings.telegram_mode != "webhook"
+            or not settings.webhook_secret
+            or not hmac.compare_digest(
+                settings.webhook_secret, x_telegram_bot_api_secret_token
+            )
+        ):
+            raise HTTPException(403, "Invalid webhook")
+        raw = await request.body()
+        if len(raw) > 100000:
+            raise HTTPException(413, "Update too large")
+        update = json.loads(raw)
+        accepted = engine.ingest(update)
+        if accepted and "callback_query" in update:
+            with suppress(Exception):
+                await telegram.call(
+                    "answerCallbackQuery",
+                    {
+                        "callback_query_id": update["callback_query"]["id"],
+                        "text": "Received; checking this proposal.",
+                    },
+                )
+        return {"ok": True}
+
+    @app.get("/api/state")
+    def state(authorization: str = Header(default="")):
+        authorised(authorization)
+        return store.snapshot()
+
+    @app.post("/api/evidence")
+    def evidence(body: EvidenceInput, authorization: str = Header(default="")):
+        authorised(authorization)
+        try:
+            return {"id": engine.add_evidence(body)}
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+    @app.put("/api/budget")
+    def budget(body: BudgetInput, authorization: str = Header(default="")):
+        authorised(authorization)
+        with store.tx() as db:
+            used = db.execute(
+                "SELECT COALESCE(SUM(amount),0) FROM operations WHERE category=? AND state IN ('approval','operator_pending','unknown','succeeded')",
+                (body.category,),
+            ).fetchone()[0]
+            if (
+                body.ceiling_paise < used
+                or body.autonomous_limit_paise > body.ceiling_paise
+            ):
+                raise HTTPException(
+                    409, "Budget below obligations or cap above ceiling"
+                )
+            db.execute(
+                "INSERT INTO budgets VALUES(?,?,?,?,?,?,?) ON CONFLICT(category) DO UPDATE SET ceiling=excluded.ceiling,cap=excluded.cap,delegated=excluded.delegated,scope=excluded.scope,recipient=excluded.recipient,kind=excluded.kind",
+                (
+                    body.category,
+                    body.ceiling_paise,
+                    body.autonomous_limit_paise,
+                    body.delegate_spend,
+                    body.scope,
+                    body.recipient,
+                    body.kind,
+                ),
+            )
+            Store.log(db, None, "budget_configured", body.model_dump())
+        return {"ok": True}
+
+    return app
+
+
+app = create_app()

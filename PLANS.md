@@ -1,33 +1,10 @@
-# Experience design plan
+# Current implementation iteration
 
-Scope confirmed 1 October 2026: design both journeys before implementation;
-Telegram prototype; autonomous courier recovery within its approved budget.
+1. Python state, policy, jobs, Telegram and operator console: implemented.
+2. OpenRouter model and bot credentials: live checks passed.
+3. Free Render/PostgreSQL deployment: in progress; see handoff for verified status.
+4. Gnani speech adapter: implemented from current docs; real API evidence requires key/audio.
+5. Pine Labs/Delhivery: operator-assisted requests and labelled evidence; precise product contracts still need validation.
+6. Tests, two-journey rehearsals and cloud restart verification: in progress.
 
-## This iteration
-
-1. Inspect source briefs and conflicting context. **Complete.**
-2. Record user decisions, preserve material unknowns. **Complete.**
-3. Design onboarding, décor, courier, approvals and recovery behaviour. **Complete.**
-4. Create a local clickable review of both journeys and exception paths. **Complete.**
-5. Check content consistency, links, script syntax and browser interactions. **Complete** for static review scope; see handoff for test boundaries.
-
-## Next implementation sequence, pending design review
-
-1. Confirm authority configuration and evidence fixtures; validate partner access,
-   endpoints and logistics feasibility before choosing a recording scenario.
-2. Select model/runtime; implement persistent commitments, evidence, event inbox,
-   operation outbox, deterministic authority and scheduler together.
-3. Connect Telegram with exact-proposal approvals and verified identities.
-4. Add model-led planning and explicitly labelled rail adapters. Integrate a
-   complete journey through verified outcome, then exercise the second journey.
-5. Run failure, idempotency and restart cases; capture ledger and recording proof.
-
-## Risks and rollback
-
-Same-day courier availability and exact rail semantics are unverified. ₹5,000
-is still an illustrative cap. Model, hosting, budgets, approver rules and callback
-timings are open. Static review fixtures must never be reused as completion proof.
-
-Changes this iteration are local design artifacts and the requested project
-harness. Original resources and unrelated `.DS_Store` changes are preserved.
-The design artifacts can be revised without migration or external effects.
+The previous persona and experience design remains the reference in docs/.

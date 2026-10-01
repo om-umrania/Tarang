@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 
 root = Path.cwd()
-review = root / 'docs/experience-review.html'
+review = root / 'docs/index.html'
 errors = []
 
 def check_link(source, target):
@@ -48,7 +48,7 @@ class ReviewParser(HTMLParser):
 
 parser = ReviewParser()
 parser.feed(review.read_text())
-for source in [root / 'README.md', root / 'PLANS.md', *sorted((root / 'docs').glob('*.md'))]:
+for source in [root / 'README.md', root / 'PLANS.md', *sorted((root / 'docs').glob('*.md')), *sorted((root / 'prompts').glob('*.md'))]:
     for target in re.findall(r'\]\(([^)]+)\)', source.read_text()):
         check_link(source, target)
 
@@ -62,7 +62,8 @@ with tempfile.TemporaryDirectory(prefix='tarang-review-') as temp:
 if errors:
     raise SystemExit('\n'.join(errors))
 print('PASS: review JavaScript syntax, unique HTML IDs, and local document links.')
-print('Scope: static design artifacts only. Browser review is separate; no agent or integration tests exist yet.')
+print('Static checks passed. Runtime contract tests follow; live integrations require separate evidence.')
 PY
 
+python3 -m pytest -q
 git diff --check

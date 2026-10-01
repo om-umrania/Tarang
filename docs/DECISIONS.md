@@ -7,6 +7,8 @@
 | D01 | Design both journeys before implementing the agent | “Design both journeys before implementing” |
 | D02 | Telegram is the working prototype's couple interface | “Yes—Telegram for the working prototype (Recommended)” |
 | D03 | Canonical courier recovery pays ₹1,200 automatically from an approved courier budget | “Pay automatically from an approved courier budget” |
+| D04 | Python is the base language for the agent architecture | “The base architecture would be based on Python” |
+| D05 | Develop Tarang's persona in the next iteration; target a hosted agent on Render or Vercel | “make the persona of the tarang” and “using Render or Vercel to deploy it” |
 
 The product's submitted WhatsApp concept remains historical context; D02 settles
 the prototype interface without claiming the production channel has changed.
@@ -50,7 +52,8 @@ from source scenarios. Do not hard-code it as a universal or confirmed limit.
 | Logistics feasibility | Shop origin, addresses, package shape, deadline/SLA and ₹1,200 service support unverified |
 | Payment semantics | Exact product, payee, funding, order of operations, ₹40,000 obligations and rail payloads unverified |
 | Outcome evidence | Named venue verifier, acceptable décor proof and hamper receipt contract proposed, not confirmed |
-| Model/runtime | No model, hosting or database selected; source recommendations are not implementation commitments |
+| Runtime/hosting | Python confirmed. Render or Vercel are candidates; provider, service tier, database and model unselected. See [Phase 2](PHASE_2.md) |
+| Persona | [v0.1](PERSONA.md) proposes a warm coordinator and adaptive language; relationship, default language and voice remain for review |
 | Recording | One versus both, valid source events and treatment of compressed scenario time remain open |
 
 ## Source precedence
@@ -59,3 +62,13 @@ Original competition brief for competition requirements → explicit current use
 decisions → approved design decisions → proposals → historical context.
 Preserve source files as evidence. A proposal or storyboard does not override an
 explicit decision or prove an integration works.
+
+## Implementation decisions · 1 October 2026
+
+- Om requested the end-to-end Python prototype and provided the Telegram bot.
+- Om chose OpenRouter for model access; model selection delegated. Gemini 3.8
+  Flash is the initial candidate, configurable through MODEL, with live smoke evidence.
+- Use existing/free resources first. Render free web + free PostgreSQL selected;
+  sleeping compute means deferred due checks, and the DB expires 31 October.
+- New PDFs under resources/mails were read; Round 2 source constraints reconciled
+  with the later Round 3 simulation. See [RAILS.md](RAILS.md).

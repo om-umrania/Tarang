@@ -1,6 +1,15 @@
+# Implemented prototype update · 1 October 2026
+
+The current Python implementation and its narrower boundaries are documented in [RUNTIME.md](RUNTIME.md). FastAPI + OpenRouter + Telegram use SQLite locally and PostgreSQL on free Render. One worker serialises decisions; external rails remain operator-assisted except the runnable Gnani STT adapter awaiting credentials. The design below is the broader target, not a claim that every proposed subsystem is implemented.
+
 # Proposed automation architecture
 
 **Design only. No agent, database, scheduler or integrations are implemented.**
+
+**Phase 2 update:** Python is now confirmed for the runtime. Render or Vercel will
+host the agent; the provider is not yet selected. FastAPI, PostgreSQL and a Render
+worker are recommendations for review. See [Phase 2](PHASE_2.md) for comparison,
+iteration milestones and the definition of a live agent.
 
 Both journeys use one persistent commitment loop. Telegram is the human
 interface. An AI model assesses evidence and proposes actions. Deterministic
@@ -122,6 +131,7 @@ exhausted budgets, concurrent reservations, declined approval, silence expiry,
 pending payment after timeout, malformed rail responses, missed pickup, disputed
 receipt, incomplete setup evidence, pause/revocation and restart recovery.
 
-Implementation stack, exact partner endpoints, payment product and model remain
-open. Prefer the smallest durable runtime that meets these contracts; do not add
+Python is confirmed. Framework, hosting/database provider, exact partner endpoints,
+payment product and model remain open. Prefer the smallest durable runtime that
+meets these contracts; do not add
 LangGraph or Supabase solely because an older document recommends them.
