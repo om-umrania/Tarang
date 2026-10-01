@@ -1,9 +1,26 @@
 import os
+import json
 from dataclasses import dataclass, field
 from dotenv import load_dotenv
 
 load_dotenv("/etc/secrets/tarang.env")
 load_dotenv(override=True)
+
+
+def whatsapp_routes_from_env():
+    try:
+        routes = json.loads(os.getenv("WHATSAPP_ROUTES", "{}"))
+        if isinstance(routes, dict) and all(
+            isinstance(k, str)
+            and k.isdigit()
+            and isinstance(v, str)
+            and 0 < len(v) <= 100
+            for k, v in routes.items()
+        ):
+            return routes
+    except ValueError:
+        pass
+    return {}  # Invalid routing disables intake without taking Telegram offline.
 
 
 @dataclass
@@ -35,3 +52,18 @@ class Settings:
     telegram_mode: str = field(
         default_factory=lambda: os.getenv("TELEGRAM_MODE", "polling")
     )
+
+    whatsapp_enabled: bool = field(
+        default_factory=lambda: os.getenv("WHATSAPP_ENABLED") == "true"
+    )
+    whatsapp_app_secret: str = field(
+        default_factory=lambda: os.getenv("WHATSAPP_APP_SECRET", "")
+    )
+    whatsapp_verify_token: str = field(
+        default_factory=lambda: os.getenv("WHATSAPP_VERIFY_TOKEN", "")
+    )
+    whatsapp_phone_id: str = field(
+        default_factory=lambda: os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
+    )
+    # Explicit sender -> wedding scope routing, never infer a shared wedding.
+    whatsapp_routes: dict[str, str] = field(default_factory=whatsapp_routes_from_env)

@@ -86,3 +86,14 @@ The standalone storyboard `docs/index.html` contains both designed journeys,
 onboarding proposals and failure branches. Earlier design publication was
 `4acfd5f`; user commit `2fe600f` renamed the review to `index.html`. The submitted
 competition resources remain authoritative over invented capabilities.
+
+## WhatsApp conflict foundation — 1 October 2026
+
+Added a disabled-by-default, receive-only Cloud API webhook, durable scoped text inbox,
+source-checked conflict detector, bounded retries and authenticated operator review.
+25 local contract tests pass. See WHATSAPP.md for configuration and pending live checks.
+No WhatsApp credentials configured or actual WhatsApp conversation connected yet.
+
+Two synthetic live OpenRouter conflict probes passed: contradictory setup times flagged
+with source quotes; agreeing times produced no conflict. This is model evidence, not
+a live WhatsApp delivery test. Local receipt: `.runtime/whatsapp-synthetic-eval.json`.

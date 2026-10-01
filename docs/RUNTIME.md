@@ -132,3 +132,10 @@ production backup/restore and proactive alerting are follow-up work.
 
 API contracts referenced: [Telegram Bot API](https://core.telegram.org/bots/api),
 [OpenRouter structured outputs](https://openrouter.ai/docs/guides/features/structured-outputs).
+
+## WhatsApp conflict inbox
+
+See [WHATSAPP.md](WHATSAPP.md) for the receive-only adapter, scoped routes, webhook
+configuration and limitations. Intake defaults to disabled. Existing groups, voice
+notes and historical chats are not connected. Source-quoted possible conflicts appear
+in the operator console; live WhatsApp delivery remains unverified.

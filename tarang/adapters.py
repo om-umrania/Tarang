@@ -19,6 +19,19 @@ class OpenRouter:
             .split("## Short version")[0]
         )
         policy = (root / "prompts/runtime.md").read_text()
+        return await self.structured(context, policy + "\n" + persona, Decision)
+
+    async def detect_conflicts(self, context):
+        from .schema import ConflictReport
+
+        policy = (
+            Path(__file__).resolve().parent.parent / "prompts/conflicts.md"
+        ).read_text()
+        return await self.structured(context, policy, ConflictReport)
+
+    async def structured(self, context, policy, schema):
+        if not self.settings.model_key:
+            raise RuntimeError("model_not_configured")
         async with httpx.AsyncClient(timeout=60) as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
@@ -26,7 +39,7 @@ class OpenRouter:
                 json={
                     "model": self.settings.model,
                     "messages": [
-                        {"role": "system", "content": policy + "\n" + persona},
+                        {"role": "system", "content": policy},
                         {"role": "user", "content": json.dumps(context)},
                     ],
                     "response_format": {
@@ -34,7 +47,7 @@ class OpenRouter:
                         "json_schema": {
                             "name": "tarang_decision",
                             "strict": True,
-                            "schema": Decision.model_json_schema(),
+                            "schema": schema.model_json_schema(),
                         },
                     },
                     "provider": {"require_parameters": True},
@@ -44,7 +57,7 @@ class OpenRouter:
             )
             if response.status_code != 200:
                 raise RuntimeError(f"model_http_{response.status_code}")
-            return Decision.model_validate_json(
+            return schema.model_validate_json(
                 response.json()["choices"][0]["message"]["content"]
             )
 

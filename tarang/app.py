@@ -1,17 +1,19 @@
 import asyncio
 import hmac
+import hashlib
 import fcntl
 import json
 import time
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from .config import Settings
 from .store import Store
 from .adapters import OpenRouter, Telegram
 from .engine import Engine
-from .schema import EvidenceInput, BudgetInput, CheckInput
+from .schema import EvidenceInput, BudgetInput, CheckInput, ConflictReview
+from .whatsapp import ConflictMonitor
 
 
 def create_app(settings=None, model=None, telegram=None, run_worker=True):
@@ -20,12 +22,16 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     telegram = telegram or Telegram(settings.bot_token)
     engine = Engine(store, settings, model or OpenRouter(settings), telegram)
 
+    monitor = ConflictMonitor(store, settings, engine.model)
+
     async def worker():
         engine.recover()
+        monitor.recover()
         while True:
             try:
                 await engine.step()
                 await engine.send_one()
+                await monitor.step()
             except Exception as exc:
                 with store.tx() as db:
                     Store.log(db, None, "worker_error", {"type": type(exc).__name__})
@@ -81,10 +87,12 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                 ).fetchone()[0]
                 if acquired:
                     engine.recover()
+                    monitor.recover()
                     while True:
                         connection.execute("SELECT 1")
                         await engine.step()
                         await engine.send_one()
+                        await monitor.step()
                         await asyncio.sleep(1)
             except asyncio.CancelledError:
                 raise
@@ -129,6 +137,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
         openapi_url=None,
     )
     app.state.engine = engine
+    app.state.monitor = monitor
 
     def authorised(value):
         if not settings.operator_token or not hmac.compare_digest(
@@ -172,6 +181,79 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                         "text": "Received; checking this proposal.",
                     },
                 )
+        return {"ok": True}
+
+    @app.get("/whatsapp/webhook", response_class=PlainTextResponse)
+    def whatsapp_verify(request: Request):
+        q = request.query_params
+        if (
+            not monitor.ready
+            or q.get("hub.mode") != "subscribe"
+            or not hmac.compare_digest(
+                q.get("hub.verify_token", ""), settings.whatsapp_verify_token
+            )
+        ):
+            raise HTTPException(403, "Invalid verification")
+        return q.get("hub.challenge", "")
+
+    @app.post("/whatsapp/webhook")
+    async def whatsapp_receive(
+        request: Request, x_hub_signature_256: str = Header(default="")
+    ):
+        if not monitor.ready:
+            raise HTTPException(503, "WhatsApp intake is disabled")
+        raw = bytearray()
+        async for chunk in request.stream():
+            raw.extend(chunk)
+            if len(raw) > 100000:
+                raise HTTPException(413, "Webhook too large")
+        expected = (
+            "sha256="
+            + hmac.new(
+                settings.whatsapp_app_secret.encode(), raw, hashlib.sha256
+            ).hexdigest()
+        )
+        if not hmac.compare_digest(expected, x_hub_signature_256):
+            raise HTTPException(403, "Invalid signature")
+        try:
+            payload = json.loads(raw)
+            if not isinstance(payload, dict):
+                raise ValueError()
+            monitor.ingest(payload)
+        except (ValueError, TypeError, AttributeError):
+            raise HTTPException(400, "Invalid webhook body") from None
+        return {"ok": True}
+
+    @app.get("/api/whatsapp")
+    def whatsapp_status(authorization: str = Header(default="")):
+        authorised(authorization)
+        return {
+            "configured": monitor.ready,
+            "mode": "receive-only direct text messages",
+            "source_limit": "No existing group history or personal-account access",
+            "model_configured": bool(settings.model_key),
+            "free_host": settings.free_host,
+        }
+
+    @app.patch("/api/conflicts/{conflict_id}")
+    def review_conflict(
+        conflict_id: int, body: ConflictReview, authorization: str = Header(default="")
+    ):
+        authorised(authorization)
+        with store.tx() as db:
+            if not db.execute(
+                "SELECT id FROM conflicts WHERE id=?", (conflict_id,)
+            ).fetchone():
+                raise HTTPException(404, "Conflict not found")
+            db.execute(
+                "UPDATE conflicts SET state=? WHERE id=?", (body.state, conflict_id)
+            )
+            Store.log(
+                db,
+                None,
+                "conflict_review",
+                {"conflict_id": conflict_id, **body.model_dump()},
+            )
         return {"ok": True}
 
     @app.get("/api/state")

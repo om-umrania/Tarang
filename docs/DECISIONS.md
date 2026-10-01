@@ -78,3 +78,11 @@ explicit decision or prove an integration works.
   after several minutes, selected a tested free OpenRouter Nemotron candidate as
   temporary default. Gemini remains configurable; this is not a claim of equivalent
   quality or a completed model benchmark.
+
+### 1 October 2026 — WhatsApp request
+
+Om requested a live agent listening for conflicts in WhatsApp conversations. Implemented
+receive-only direct-message webhook and scoped conflict-review foundation, disabled
+pending source choice and configuration. Whether the intended source is direct messages,
+an existing group or forwarded conversations remains open. No personal archive access,
+participant posting, automatic conflict resolution or added spending authority inferred.

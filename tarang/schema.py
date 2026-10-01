@@ -54,3 +54,26 @@ class BudgetInput(Strict):
 class CheckInput(Strict):
     commitment_id: int
     delay_seconds: int = Field(ge=30, le=86400)
+
+
+class ConflictSource(Strict):
+    message_id: int
+    quote: str = Field(min_length=1, max_length=1000)
+
+
+class Conflict(Strict):
+    kind: Literal[
+        "schedule", "budget", "quantity", "specification", "responsibility", "delivery"
+    ]
+    summary: str = Field(min_length=1, max_length=1000)
+    sources: list[ConflictSource] = Field(min_length=2, max_length=6)
+    clarification: str = Field(min_length=1, max_length=500)
+
+
+class ConflictReport(Strict):
+    conflicts: list[Conflict] = Field(max_length=8)
+
+
+class ConflictReview(Strict):
+    state: Literal["resolved", "dismissed", "review"]
+    note: str = Field(min_length=1, max_length=1000)

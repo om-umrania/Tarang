@@ -8,3 +8,12 @@
 6. 16 contract tests and four live probes on each model pass. The isolated real-clock/live-model test passes locally. Full rail journeys and the combined hosted unattended follow-up remain open.
 
 The previous persona and experience design remains the reference in docs/.
+
+## WhatsApp follow-on
+
+- [x] Signed receive-only webhook, explicit wedding routing, durable inbox.
+- [x] Possible-conflict detection with validated message IDs/quotes and operator review.
+- [x] Local security/contract tests (25 total).
+- [ ] Confirm source: direct business messages, existing group, or forwarded messages.
+- [ ] Configure approved Meta app/number/senders; verify actual message delivery and detection.
+- [ ] Assess existing-group support if that is the chosen source; no group access assumed.
