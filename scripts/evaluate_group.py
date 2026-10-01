@@ -31,6 +31,7 @@ class RecordingModel(OpenRouter):
 async def main():
     with tempfile.TemporaryDirectory() as temp:
         settings = Settings(
+            **({"model": sys.argv[1]} if len(sys.argv) > 1 else {}),
             database=temp + "/test.sqlite3",
             group_enabled=True,
             group_id="synthetic@g.us",
@@ -82,9 +83,11 @@ async def main():
             ),
             "error": status["state"].get("error"),
         }
-        Path(".runtime/hourly-group-evaluation.json").write_text(
-            json.dumps(receipt, indent=2)
-        )
+        Path(
+            ".runtime/hourly-group-evaluation-"
+            + settings.model.replace("/", "_").replace(":", "_")
+            + ".json"
+        ).write_text(json.dumps(receipt, indent=2))
         print(json.dumps(receipt))
         if not passed:
             raise SystemExit(1)

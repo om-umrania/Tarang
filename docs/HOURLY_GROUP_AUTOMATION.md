@@ -116,3 +116,10 @@ wall-clock timeout (in addition to HTTP timeouts), and runs separately from Tele
 processing. Cursor state remains unchanged on failure. Resolve the model-quality/
 availability gate before activating on real group content. Do not describe the hourly
 monitor as live, paired or semantically verified based on the passing contract tests.
+
+Additional synthetic candidate checks: Qwen's free route reached the 75-second timeout;
+Gemma's free route returned a provider error. Neither is promoted to the live model.
+The group review acceptance test remains failed; supplying credits for a dependable
+compatible model, or finding a passing existing provider route, is an activation gate.
+The live server status confirms enabled=false, source_status=not_connected and
+interval_seconds=3600. No live group messages or credentials were transmitted.
