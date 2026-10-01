@@ -187,6 +187,43 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
 
+    @app.post("/api/model-check")
+    async def model_check(authorization: str = Header(default="")):
+        authorised(authorization)
+        # Fixed synthetic data only: never replay private chat state for diagnostics.
+        try:
+            d = await engine.model.decide(
+                {
+                    "now_utc": "2026-10-01T00:00:00Z",
+                    "commitment": {
+                        "outcome": "Synthetic setup verification",
+                        "owner": "test operator",
+                    },
+                    "incoming": {
+                        "source": "clock",
+                        "payload": {"type": "synthetic_due_check"},
+                    },
+                    "operations": [],
+                    "evidence": [],
+                    "budgets": [],
+                    "recent_sent_messages": [
+                        "Synthetic example: waiting for wedding date."
+                    ],
+                }
+            )
+            return {"ok": True, "model": settings.model, "schema_valid": True}
+        except RuntimeError as exc:
+            import re
+
+            code = (
+                str(exc)
+                if re.fullmatch(r"model_http_[0-9]{3}|model_not_configured", str(exc))
+                else "model_error"
+            )
+            return {"ok": False, "code": code}
+        except Exception as exc:
+            return {"ok": False, "code": type(exc).__name__}
+
     @app.post("/api/check")
     def check(body: CheckInput, authorization: str = Header(default="")):
         authorised(authorization)
