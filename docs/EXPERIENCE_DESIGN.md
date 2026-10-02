@@ -13,6 +13,10 @@ policies are explicitly identified. See [decisions](DECISIONS.md).
 
 ## 1. What a great experience means
 
+For the newer Muskan/Om rehearsal, see the [responsibility audit](RESPONSIBILITY_AUDIT.md).
+It assigns routine coordination to Tarang, preserves human decisions and physical
+verification, and distinguishes the target workflow from current integration gaps.
+
 Meera and Rohan should be able to say: “I know what Tarang is handling, I know
 when it needs me, and I do not need to remember to chase it.”
 

@@ -25,6 +25,9 @@ def whatsapp_routes_from_env():
 
 @dataclass
 class Settings:
+    public_demo: bool = field(
+        default_factory=lambda: os.getenv("PUBLIC_DEMO_ENABLED", "false") == "true"
+    )
     database: str = field(
         default_factory=lambda: os.getenv("DATABASE_URL")
         or os.getenv("DATABASE_PATH", ".runtime/tarang.sqlite3")

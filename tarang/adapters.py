@@ -21,6 +21,14 @@ class OpenRouter:
         policy = (root / "prompts/runtime.md").read_text()
         return await self.structured(context, policy + "\n" + persona, Decision)
 
+    async def demo_reply(self, context):
+        from .public_demo import DemoReply
+
+        policy = (
+            Path(__file__).resolve().parent.parent / "prompts/public-demo.md"
+        ).read_text()
+        return await self.structured(context, policy, DemoReply, max_tokens=1600)
+
     async def detect_conflicts(self, context):
         from .schema import ConflictReport
 

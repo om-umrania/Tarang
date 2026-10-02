@@ -21,8 +21,9 @@ setting up on a new machine. The current workspace has generated local values.
 
 Open the operator console at `http://127.0.0.1:8766/`; enter OPERATOR_TOKEN from
 `.env`. It is held only in the page, never persisted in browser storage. All data
-endpoints require a bearer token. Telegram only accepts allowlisted private chats;
-no first-message auto-enrolment. `/pause` immediately holds model-generated effects;
+endpoints require a bearer token. The real wedding workspace only accepts allowlisted
+private chats. The separately enabled [public demo](PUBLIC_DEMO.md) enrols visitors
+into isolated fictional sessions with no operational authority. `/pause` immediately holds model-generated effects;
 `/resume` resumes observations; `/status` displays persistent state. A single
 commitment is tracked per chat in this first slice; group/multi-wedding support
 and opening a second outcome in the same chat need a later data-model iteration.

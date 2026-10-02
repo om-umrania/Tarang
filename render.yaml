@@ -17,6 +17,8 @@ services:
           property: connectionString
       - key: TELEGRAM_MODE
         value: webhook
+      - key: PUBLIC_DEMO_ENABLED
+        value: 'true'
       - key: MODEL
         value: nvidia/nemotron-3-super-120b-a12b:free
       - key: TELEGRAM_BOT_TOKEN

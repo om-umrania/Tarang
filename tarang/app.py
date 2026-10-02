@@ -16,6 +16,7 @@ from .schema import EvidenceInput, BudgetInput, CheckInput, ConflictReview
 from .whatsapp import ConflictMonitor
 from .group_monitor import GroupMonitor
 from .schema import GroupBatch
+from .public_demo import PublicDemo
 
 
 def create_app(settings=None, model=None, telegram=None, run_worker=True):
@@ -23,6 +24,25 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     store = Store(settings.database)
     telegram = telegram or Telegram(settings.bot_token)
     engine = Engine(store, settings, model or OpenRouter(settings), telegram)
+    demo = PublicDemo(store, settings, engine.model)
+
+    def ingest(update):
+        return demo.ingest(update) or engine.ingest(update)
+
+    async def demo_worker():
+        last_cleanup = 0
+        while True:
+            try:
+                if time.time() - last_cleanup > 3600:
+                    demo.cleanup()
+                    last_cleanup = time.time()
+                await demo.step()
+            except Exception as exc:
+                with store.tx() as db:
+                    Store.log(
+                        db, None, "demo_worker_error", {"type": type(exc).__name__}
+                    )
+            await asyncio.sleep(1)
 
     monitor = ConflictMonitor(store, settings, engine.model)
     group_monitor = GroupMonitor(store, settings, engine.model)
@@ -68,7 +88,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                     },
                 )
                 for update in updates:
-                    engine.ingest(update)
+                    ingest(update)
                     if "callback_query" in update:
                         await telegram.call(
                             "answerCallbackQuery",
@@ -134,6 +154,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                     ) from None
             tasks.append(asyncio.create_task(lead_worker()))
             tasks.append(asyncio.create_task(group_worker()))
+            tasks.append(asyncio.create_task(demo_worker()))
             if settings.telegram_mode == "polling" and settings.bot_token:
                 tasks.append(asyncio.create_task(poll()))
         yield
@@ -155,6 +176,8 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     app.state.engine = engine
     app.state.monitor = monitor
     app.state.group_monitor = group_monitor
+    app.state.demo = demo
+    app.state.ingest = ingest
 
     def authorised(value):
         if not settings.operator_token or not hmac.compare_digest(
@@ -166,7 +189,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     def health():
         with store.tx() as db:
             db.execute("SELECT 1")
-        return {"status": "ok", "prototype": True}
+        return {"status": "ok", "prototype": True, "public_demo": settings.public_demo}
 
     @app.get("/", response_class=HTMLResponse)
     def console():
@@ -188,7 +211,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
         if len(raw) > 100000:
             raise HTTPException(413, "Update too large")
         update = json.loads(raw)
-        accepted = engine.ingest(update)
+        accepted = ingest(update)
         if accepted and "callback_query" in update:
             with suppress(Exception):
                 await telegram.call(

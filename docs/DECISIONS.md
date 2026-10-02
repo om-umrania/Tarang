@@ -94,3 +94,24 @@ hourly, rather than manual Codex checks or exports. Om selected a dedicated What
 account. Implemented isolated linked-device bridge and hourly Python review job;
 pairing, target group ID and always-on hosting remain required for live operation.
 Do not call the previous direct-message Cloud API adapter an existing-group connector.
+
+### 2 October 2026 — controlled calling rehearsal
+
+Om authorised a rehearsal call to himself using the number supplied privately in
+chat. He chose: negotiate the illustrative décor surcharge from ₹2,500 toward
+₹1,500, with ₹2,500 as the negotiation ceiling, preserving the agreed scope and
+4 pm readiness deadline; ask Om before agreeing. This does not delegate booking,
+payment, or acceptance authority, even below the ceiling. Do not contact the real
+venue or Aditya for this rehearsal. Do not put the phone number in tracked files.
+
+Om reports having outbound calling access and will provide its API documentation.
+Provider authentication, dialling, callback verification and call-result contracts
+remain unverified. The existing Gnani STT adapter cannot place calls.
+See [calling rehearsal](CALLING_REHEARSAL.md) for the acceptance sequence.
+
+### 2 October 2026 — public sharing
+
+Om chose “Private demo for each person” for visitors following the Telegram link.
+Public visitors get isolated fictional scenarios and demo conversations, not access
+to the wedding workspace. Live actions remain unavailable in demo mode. Existing
+private-workspace authority is unchanged. See [public demo](PUBLIC_DEMO.md).
