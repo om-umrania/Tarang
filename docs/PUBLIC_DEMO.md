@@ -89,3 +89,16 @@ refused. No real operation or commitment was created. Receipt stays ignored at
 
 Deployment and a real Telegram client round trip must be verified separately before
 claiming the public experience was tested through Telegram.
+
+### Deployment verification — 2 October 2026
+
+Runtime commit `09f17cf385cd01bb745342ba8efd56916e94498e` was pushed to GitHub
+and deployed on the existing free Render service. Deploy
+`dep-davt7kqjnfac73d2r6j0` reported `live`. The deployed health endpoint returned
+200 with `public_demo: true`; unauthenticated state access returned 401 and an
+unsigned Telegram webhook returned 403. Telegram confirmed the expected bot
+username and Render webhook, zero pending updates and no reported webhook error.
+The owner was asked to open the demo link and try its buttons; a real client
+round trip is still awaiting that confirmation. No paid plan was provisioned.
+The minimal deployment receipt is local and ignored in
+`.runtime/public-demo-deployment.json`.
