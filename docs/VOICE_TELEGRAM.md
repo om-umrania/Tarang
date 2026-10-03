@@ -121,3 +121,29 @@ speech is working, but approval to copy the specific Gnani credential to Render
 is pending after automatic approval review rejected that transfer. No workaround
 or secret transmission was performed. The user-recorded Telegram audio test remains
 pending hosted activation. Private deployment/health receipts are under `.runtime/`.
+
+### Real Telegram media transport check — 3 October 2026
+
+`scripts/verify_telegram_voice.py` passed with actual Gnani STT/TTS, actual
+OpenRouter intake and Telegram Bot API media upload, download and spoken reply
+acceptance. The single configured operator chat displayed the five-second
+synthetic input recording, recognized transcript, twenty-second spoken follow-up
+and matching text with suggested answers at 12:37 IST. The extracted problem
+was delayed décor; the ivory/peach design and existing budget were preserved.
+Operational tables stayed empty in the isolated disposable database.
+
+Input updates and `/heard` confirmation were generated locally for this labelled
+fictional recording. This is **not** a human-recorded Telegram webhook round trip,
+listening/pronunciation assessment, hosted voice activation or phone call. The
+first probe ended in an assertion failure after uploading its labelled input;
+a subsequent probe passed. No successful receipt is inferred for the first probe.
+Private evidence: `.runtime/live-telegram-voice.json` records Telegram message
+IDs and explicitly marks human input, human confirmation and calling false.
+Run the script only when labelled bot messages to the configured operator chat
+are authorized; it sends real messages and uses live provider access.
+
+Next acceptance gate: explicitly authorize `GNANI_API_KEY` storage in the existing
+Render service, activate that service, record a fictional Telegram voice note,
+review the transcript yourself, confirm it and listen to the spoken question.
+Calling remains a separate integration requiring the actual telephony API and
+configured account; Gnani speech recognition/synthesis alone does not place calls.

@@ -134,3 +134,12 @@ puts **Start with voice** first; `/voice` starts directly after the welcome and
 preserves existing text-conversation facts. 74 runtime tests pass. Hosted key
 configuration is awaiting explicit permission to copy the credential to Render.
 See [voice evidence](VOICE_TELEGRAM.md); the real Telegram audio round trip is pending.
+
+
+Voice evidence update (3 October, 12:37 IST): the live synthetic probe in
+`scripts/verify_telegram_voice.py` passed Gnani STT/TTS, OpenRouter intake and
+actual Telegram media transport, with input and spoken follow-up visible in the
+Mac client. Updates and confirmation were synthetic/local; human recording,
+playback quality, hosted activation and calling remain pending. See
+[voice verification](VOICE_TELEGRAM.md). Explicit permission to store the Gnani key
+in Render remains pending following the prior automatic approval rejection.
