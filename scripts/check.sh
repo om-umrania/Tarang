@@ -8,6 +8,11 @@ if ! command -v node >/dev/null 2>&1; then
     exit 1
 fi
 
+if ! node -e 'const [major, minor] = process.versions.node.split(".").map(Number); process.exit(major > 22 || (major === 22 && minor >= 13) ? 0 : 1)'; then
+    echo 'ERROR: Node.js 22.13+ is required; the Node.js runtime on PATH is unsupported.' >&2
+    exit 1
+fi
+
 python3 - <<'PY'
 from html.parser import HTMLParser
 from pathlib import Path
