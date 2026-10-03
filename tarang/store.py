@@ -154,7 +154,9 @@ class PostgresConnection:
         self.conn = conn
 
     def execute(self, sql, parameters=()):
-        sql = sql.replace("?", "%s")
+        # psycopg parses literal percent signs when parameters are supplied.
+        # Escape SQL wildcards before translating our SQLite-style placeholders.
+        sql = sql.replace("%", "%%").replace("?", "%s")
         ignore = "INSERT OR IGNORE" in sql
         sql = sql.replace("INSERT OR IGNORE", "INSERT")
         if ignore:

@@ -163,6 +163,11 @@ class Intake:
         else:
             text = "Rehearsal paused. No background actions run in this demo. You can resume or change a detail."
         options = cls.choices(state)
+        if options:
+            text += "\n\n" + " · ".join(
+                f"{i + 1}. {label}" for i, label in enumerate(options)
+            )
+            text += "\nTap a button or reply /choose followed by its number. You can also type your own answer."
         buttons = [
             [{"text": label, "callback_data": f"demo:pick:{state['revision']}:{i}"}]
             for i, label in enumerate(options)

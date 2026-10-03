@@ -72,3 +72,18 @@ correction and zero-real-record checks. Semantic review exposed user-chasing wor
 in the first run; the updated prompt's repeat probe proposed agent coordination
 conditionally instead. The model still repeats some supplied details in its
 acknowledgement, so brevity remains a persona improvement rather than a proven property.
+
+### PostgreSQL transport fix and keyboard access
+
+The first real-client `/start demo` test exposed a PostgreSQL-only webhook failure:
+literal `%` in demo cleanup `LIKE` queries was parsed as a psycopg parameter. The
+adapter now escapes literal percent signs before converting placeholders. SQLite
+checks alone had missed this failure. The public-demo and intake fixtures support
+`TARANG_TEST_POSTGRES` for parity runs, with a fresh disposable schema per test.
+Use only a dedicated test database: the fixture creates and drops its test schemas.
+
+The conversation also supports `/talk` after the welcome, and `/choose N` for the
+numbered suggestions shown in each message. This uses the same choice validation
+as button taps and makes the flow usable with keyboard-only clients. Free-text
+answers and corrections remain available. `/talk` on first contact shows the
+privacy welcome before any model use.

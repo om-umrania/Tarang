@@ -23,9 +23,9 @@ class Model:
 
 
 @pytest.fixture
-def demo(tmp_path):
+def demo(demo_database):
     settings = Settings(
-        database=str(tmp_path / "intake.sqlite3"),
+        database=demo_database,
         public_demo=True,
         allowed=frozenset({42}),
     )
@@ -270,3 +270,26 @@ def test_signed_intake_webhook_to_message_outbox_and_transport(tmp_path):
     assert len(telegram.sent) == 3
     assert all(row["state"] == "sent" for row in rows(app.state.demo, "outbox"))
     assert not rows(app.state.demo, "commitments")
+
+
+def test_keyboard_selections_use_same_flow_and_respect_pending_answer(demo):
+    demo.ingest(update(1, 42, "/talk"))  # first command shows disclosure
+    assert not rows(demo, "demo_turns")
+    demo.ingest(update(2, 42, "/talk"))
+    assert facts(demo, 42)["phase"] == "collect"
+    demo.ingest(update(3, 42, "/choose 99"))
+    assert facts(demo, 42)["facts"]["problem"] == ""
+    demo.ingest(update(4, 42, "/choose 1"))
+    assert facts(demo, 42)["facts"]["problem"] == "Décor is delayed"
+    demo.ingest(update(5, 42, "Custom deadline"))
+    demo.ingest(update(6, 42, "/choose 1"))
+    assert facts(demo, 42)["facts"]["deadline"] == ""
+    asyncio.run(demo.step())
+    for uid in range(7, 13):
+        demo.ingest(update(uid, 42, "/choose 1"))
+    assert facts(demo, 42)["phase"] == "review"
+    demo.ingest(update(13, 42, "/choose 1"))
+    assert facts(demo, 42)["phase"] == "investigated"
+    demo.ingest(update(14, 42, "/choose 1"))
+    assert facts(demo, 42)["phase"] == "feedback"
+    assert not rows(demo, "operations")

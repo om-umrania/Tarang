@@ -30,7 +30,7 @@ WELCOME = (
     "Choosing a conversation or scenario enables AI processing: your demo text and recent replies are "
     "processed through OpenRouter. Please use fictional details, not personal information. "
     "Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
-    "/demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
+    "/talk: conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
     "· /privacy: data details. Free hosting may take a moment to wake up."
 )
 SCENARIOS = {
@@ -186,6 +186,7 @@ class PublicDemo:
                 "/demo",
                 "/start demo",
                 "/start talk",
+                "/talk",
             ) or data.startswith("demo:")
             if is_owner and not session and not wants_demo:
                 return False
@@ -269,7 +270,7 @@ class PublicDemo:
                     MENU,
                 )
                 return True
-            if data == "demo:talk":
+            if data == "demo:talk" or command == "/talk":
                 generation = uuid.uuid4().hex
                 db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
                 db.execute(
@@ -282,6 +283,24 @@ class PublicDemo:
                 )
                 Intake.start(db, key, cid)
                 return True
+            if command.startswith("/choose ") and session["scenario"] == "conversation":
+                state = Intake.read(db, cid)
+                number = command.removeprefix("/choose ").strip()
+                if (
+                    number.isascii()
+                    and number.isdigit()
+                    and 1 <= int(number) <= len(Intake.choices(state))
+                ):
+                    data = f"demo:pick:{state['revision']}:{int(number)-1}"
+                else:
+                    Intake.render(
+                        db,
+                        key,
+                        cid,
+                        state,
+                        "Choose a listed number, or type your own answer.",
+                    )
+                    return True
             if data.startswith("demo:pick:"):
                 pending = db.execute(
                     "SELECT 1 FROM demo_turns WHERE chat=? AND status IN ('pending','processing')",

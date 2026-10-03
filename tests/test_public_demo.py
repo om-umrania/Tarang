@@ -42,9 +42,9 @@ class Model:
 
 
 @pytest.fixture
-def demo(tmp_path):
+def demo(demo_database):
     settings = Settings(
-        database=str(tmp_path / "demo.sqlite3"),
+        database=demo_database,
         public_demo=True,
         allowed=frozenset({42}),
     )
