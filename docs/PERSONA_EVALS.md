@@ -51,3 +51,11 @@ Python authority, idempotency and persistence tests remain a separate requiremen
 Compare v0.1 with an alternative on four representative cases before rewriting
 the whole prompt. Review with Om, preserve counterexamples and change one voice
 dimension at a time. Do not declare the persona reliable from a single happy path.
+
+## Interactive intake verification — 3 October 2026
+
+The new intake flow has three live synthetic multi-turn model checks covering
+explicit details, correction, and an adversarial real-action request. The hosted
+fixed-fictional diagnostic also returned valid facts. These are separate from the
+15-case persona rubric above, which remains unexecuted. See
+[interactive testing](INTERACTIVE_TESTING.md) for real Telegram evidence and limits.

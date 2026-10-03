@@ -1,8 +1,28 @@
-# Tarang handoff · 1 October 2026
+# Tarang handoff · updated 3 October 2026
+
+## Interactive Telegram prototype
+
+The public fictional conversation is live at
+[Tarang demo](https://t.me/tarang_wedding_bot?start=demo). Send `/start demo`, then
+choose **Start a conversation** or send `/talk`. Answer with buttons, `/choose N`,
+or fictional free text. Intake asks for problem, deadline, contact, decision maker,
+verifier, constraints and priority, then reviews the plan before simulated action
+and feedback. The operational wedding workspace remains allowlisted.
+
+Actual Mac Telegram verification covered welcome, real button callbacks, typed
+details, a deadline correction preserving other facts, contact rehearsal, feedback
+and keyboard pause/resume. 58 runtime tests and static checks passed; all 23
+public-demo/intake tests also passed against disposable PostgreSQL. The real-client
+test exposed and repaired a PostgreSQL percent-placeholder webhook failure.
+
+Runtime commit `6714a273d8e987b14d26e655de7f1998806a17b2` is deployed. See
+[INTERACTIVE_TESTING.md](INTERACTIVE_TESTING.md) for evidence, private receipt
+pointers and limits. The full persona rubric remains unexecuted and vendor actions
+remain fictional; this is not production fulfilment evidence.
 
 ## Live prototype
 
-- Bot: https://t.me/tarang_wedding_bot (allowlisted private chat only).
+- Bot: https://t.me/tarang_wedding_bot (public fictional demo; allowlisted operations).
 - App/operator workspace: https://tarang-prototype.onrender.com.
 - Render web service: `srv-dav71cvpn0mc73affks0`, free, Singapore.
 - PostgreSQL: `dpg-dav6ujp42hec73d8bll0-a`, free, private-network access only;

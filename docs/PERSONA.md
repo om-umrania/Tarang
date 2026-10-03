@@ -205,3 +205,11 @@ retry timings are separate decisions.
    outputs, reviewer scores and failures. No persona test has run yet.
 5. Apply the approved copy to the existing walkthrough, then connect the Python
    agent. Existing storyboard copy is unchanged during this first persona draft.
+
+## Interactive direction confirmed — 3 October 2026
+
+Om confirmed questions with suggested answers, free-text input and corrections,
+with agent coordination and meaningful feedback along the way. The isolated
+Telegram rehearsal now implements that opening loop; see
+[interactive testing](INTERACTIVE_TESTING.md). Functional flow verification does
+not establish that the full voice rubric or real vendor execution is complete.

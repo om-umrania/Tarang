@@ -61,7 +61,7 @@ checks in an isolated database. Receipt: `.runtime/intake-evaluation.json` (igno
 Review wording separately from extraction/zero-operation checks. Neither synthetic
 webhooks nor captured sends establish an actual Telegram-client round trip.
 
-Deployment and client evidence will be recorded below after verification. The full
+Deployment and client evidence is recorded below. The full
 persona rubric in PERSONA_EVALS.md remains a separate, broader evaluation.
 
 ### Local and model verification — 3 October 2026
@@ -92,3 +92,36 @@ The corrected flow passed 58 SQLite runtime tests and all 23 public-demo/intake
 checks against an isolated local PostgreSQL server. The disposable server was
 stopped after the run. Oversized numeric selections are rejected before integer
 conversion; the keyboard-selection regression passes.
+
+### Actual Telegram client rehearsal — 3 October 2026
+
+The repaired welcome, `/talk` question and suggested buttons were visible in the
+Mac Telegram client. Real button callbacks advanced décor delay, deadline,
+contact, decision maker and verifier. The operator then continued with keyboard
+input and `/choose N`, because the pointer automation could not tap native buttons.
+
+A fictional typed answer set the deadline to 12 November 2026 at 4 pm IST,
+preserved the ivory/peach design and existing budget, and prioritised the deadline.
+Tarang skipped the answered priority question and displayed the full plan. A typed
+correction changed only the deadline to 3 pm IST; contact, decision maker, verifier,
+constraints and priority remained intact in the visible updated plan.
+
+Keyboard selections then displayed the explicitly simulated contact response,
+recorded **Explore alternatives**, identified the next contact response and on-site
+verification, and passed pause/resume while preserving feedback. All these replies
+were visible in the real client by 11:53 IST. An incidental voice note received the
+unsupported-input response; voice processing is not implemented.
+
+The final runtime commit is `6714a273d8e987b14d26e655de7f1998806a17b2`.
+Render deployment `dep-db09qme0tbcc73etu2gg` became live at
+06:15:43 UTC. The hosted health and fixed-fictional intake diagnostic passed;
+unauthenticated diagnostic access returned 401. Final Telegram webhook backlog
+was zero and the rehearsal outbox replies were `sent`. Telegram retains the earlier
+500 error timestamp as historical metadata; successful subsequent client turns
+and the cleared backlog establish recovery.
+
+Private ignored receipts: `.runtime/interactive-deployment-verification.json`,
+`.runtime/telegram-intake-rehearsal.json`, `.runtime/intake-evaluation.json`.
+This verifies one actual client journey plus automated edge-case contracts. The
+15-case voice rubric and real vendor integrations remain unverified. Calls,
+bookings, payments and physical completion are simulated or unavailable.
