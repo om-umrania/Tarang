@@ -26,10 +26,19 @@ Do not run local polling while the hosted Telegram webhook is active. See the ru
 
 ## Validate
 
+Install the Python development requirements above and have Node.js 22.13+ on
+`PATH` (matching the bridge's supported runtime).
+
 ```bash
 .venv/bin/python -m pytest -q
 PATH="$PWD/.venv/bin:$PATH" ./scripts/check.sh
 ```
+
+The aggregate check runs static review checks, the dependency-free Node bridge
+filter tests, Python contract tests, and Git whitespace checks. It stops on a
+failed check. To run only the bridge filter tests, use
+`node --test bridge/filter.test.mjs`; no `npm install`, linked-device pairing, or
+live service credentials are needed for these tests.
 
 Tests use fake model/transport adapters for policy and persistence. `scripts/evaluate_model.py` separately calls the configured model with labelled synthetic probes. Neither proves real payment or delivery execution.
 
