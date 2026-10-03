@@ -505,7 +505,7 @@ class PublicDemo:
             if label
             else MENU
         )
-        Store.message(db, key, chat, "DEMO · fictional scenario\n\n" + text, buttons)
+        Store.message(db, key, chat, text, buttons)
 
     def cleanup(self):
         cutoff = time.time() - 7 * 86400
@@ -547,7 +547,7 @@ class PublicDemo:
                         db,
                         "demo:ai:" + stale["key"],
                         stale["chat"],
-                        "DEMO · " + interrupted,
+                        interrupted,
                         MENU,
                     )
             # Cross-process lease serialises demo model calls without blocking the
@@ -645,7 +645,7 @@ class PublicDemo:
                 db,
                 "demo:ai:" + turn["key"],
                 turn["chat"],
-                "DEMO · AI explanation, no live actions\n\n" + reply,
+                reply,
                 MENU,
             )
         return True

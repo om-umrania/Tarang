@@ -176,9 +176,7 @@ class Intake:
             db,
             key,
             chat,
-            "DEMO · fictional conversation\n\n"
-            + (lead + "\n\n" if lead else "")
-            + text,
+            (lead + "\n\n" if lead else "") + text,
             buttons,
         )
 

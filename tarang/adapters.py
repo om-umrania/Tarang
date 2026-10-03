@@ -137,7 +137,7 @@ class Telegram:
                 f"https://api.telegram.org/bot{self.token}/sendVoice",
                 data={
                     "chat_id": str(chat),
-                    "caption": "AI-generated Tarang voice · fictional demo. Full text and choices are in the chat.",
+                    "caption": "AI-generated Tarang voice. Full text and choices are in the chat.",
                 },
                 files={"voice": ("tarang.ogg", audio, "audio/ogg")},
             )

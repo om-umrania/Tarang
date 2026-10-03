@@ -5,6 +5,11 @@ Om chose a private demo for each visitor on 2 October 2026. Share
 
 ## Visitor experience
 
+Telegram replies omit repeated demo/fictional headers, including scenario and AI
+reply labels. Voice captions identify AI-generated speech without a demo label.
+The welcome and privacy notice explain the prototype's scope; simulated events
+remain identified in their message content.
+
 The welcome explains that the demo is fictional and separate from other visitors
 and the owner's wedding. Choose décor rescue or hamper delivery, then walk through
 the scenario buttons. These vendor responses and inspections are authored fixtures,
