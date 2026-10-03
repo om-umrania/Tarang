@@ -143,3 +143,11 @@ Mac client. Updates and confirmation were synthetic/local; human recording,
 playback quality, hosted activation and calling remain pending. See
 [voice verification](VOICE_TELEGRAM.md). Explicit permission to store the Gnani key
 in Render remains pending following the prior automatic approval rejection.
+
+
+Payment iteration — 3 October: [Pine Labs contracts and setup](PAYMENTS.md) are
+reconciled against Muskan's email/attachments and official OpenAPI. Operator-only
+request preparation and documented-result ingestion are implemented. They retain
+existing exact approvals/delegation, bind beneficiary/reference/amount, preserve
+unknown obligations and never verify fulfilment from a payout. No live financial
+dispatch, sandbox transaction, hosting secret transfer or phone call occurred.

@@ -25,7 +25,9 @@ def whatsapp_routes_from_env():
 
 @dataclass
 class Settings:
-    speech_key: str = field(default_factory=lambda: os.getenv("GNANI_API_KEY", ""))
+    speech_key: str = field(
+        default_factory=lambda: os.getenv("GNANI_API_KEY", ""), repr=False
+    )
     speech_voice: str = field(
         default_factory=lambda: os.getenv("GNANI_VOICE", "Kaveri")
     )
@@ -34,9 +36,12 @@ class Settings:
     )
     database: str = field(
         default_factory=lambda: os.getenv("DATABASE_URL")
-        or os.getenv("DATABASE_PATH", ".runtime/tarang.sqlite3")
+        or os.getenv("DATABASE_PATH", ".runtime/tarang.sqlite3"),
+        repr=False,
     )
-    bot_token: str = field(default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", ""))
+    bot_token: str = field(
+        default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", ""), repr=False
+    )
     allowed: frozenset[int] = field(
         default_factory=lambda: frozenset(
             int(x)
@@ -45,10 +50,14 @@ class Settings:
         )
     )
     webhook_secret: str = field(
-        default_factory=lambda: os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
+        default_factory=lambda: os.getenv("TELEGRAM_WEBHOOK_SECRET", ""), repr=False
     )
-    operator_token: str = field(default_factory=lambda: os.getenv("OPERATOR_TOKEN", ""))
-    model_key: str = field(default_factory=lambda: os.getenv("OPENROUTER_API_KEY", ""))
+    operator_token: str = field(
+        default_factory=lambda: os.getenv("OPERATOR_TOKEN", ""), repr=False
+    )
+    model_key: str = field(
+        default_factory=lambda: os.getenv("OPENROUTER_API_KEY", ""), repr=False
+    )
     model: str = field(
         default_factory=lambda: os.getenv(
             "MODEL", "nvidia/nemotron-3-super-120b-a12b:free"
@@ -64,10 +73,10 @@ class Settings:
         default_factory=lambda: os.getenv("WHATSAPP_ENABLED") == "true"
     )
     whatsapp_app_secret: str = field(
-        default_factory=lambda: os.getenv("WHATSAPP_APP_SECRET", "")
+        default_factory=lambda: os.getenv("WHATSAPP_APP_SECRET", ""), repr=False
     )
     whatsapp_verify_token: str = field(
-        default_factory=lambda: os.getenv("WHATSAPP_VERIFY_TOKEN", "")
+        default_factory=lambda: os.getenv("WHATSAPP_VERIFY_TOKEN", ""), repr=False
     )
     whatsapp_phone_id: str = field(
         default_factory=lambda: os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
@@ -79,5 +88,5 @@ class Settings:
     )
     group_id: str = field(default_factory=lambda: os.getenv("WHATSAPP_GROUP_ID", ""))
     group_bridge_token: str = field(
-        default_factory=lambda: os.getenv("WHATSAPP_BRIDGE_TOKEN", "")
+        default_factory=lambda: os.getenv("WHATSAPP_BRIDGE_TOKEN", ""), repr=False
     )

@@ -12,7 +12,7 @@ for the actual simulation and evidence requirements.
 | Telegram | Live Bot API ingestion, private-chat allowlist, replies, exact approval callbacks | Hosted round trip and redeploy persistence verified; see handoff |
 | Model | OpenRouter structured JSON; Gemini Flash candidate plus tested temporary free Nemotron default | Scenario evaluations, not just greeting smoke |
 | Gnani | Runnable STT adapter: `python -m tarang.gnani`; exact request metadata, audio hash, HTTP status and response saved to operator evidence | GNANI_API_KEY and an authorised ≤60-second source audio clip; no live Gnani call completed yet |
-| Pine Labs | Operator-approved payment request and provenance-labelled result ingestion | Appropriate payout/authorisation product, exact API contract, supported beneficiary/funding and documented response |
+| Pine Labs | Exact documented bank-payout request preparation and correlated documented-response ingestion | Sandbox Payouts entitlement, credentials, funding and test beneficiary; live dispatch/reconciliation not enabled |
 | Delhivery | Operator shipment/tracking request and provenance-labelled result ingestion | Serviceability, origin, package count/dimensions, SLA, exact shipment/pickup/tracking contract |
 
 Gnani's documented speech endpoint is `POST https://api.vachana.ai/stt/v3` with
@@ -21,9 +21,7 @@ Gnani's documented speech endpoint is `POST https://api.vachana.ai/stt/v3` with
 names. This transcribes a recording; it does **not** place a phone call.
 [Gnani STT contract](https://docs.gnani.ai/api/STT/speech-to-text).
 
-The Pine Labs landing page lists distinct products. Its payment-collection sample
-is not proof of a vendor payout capability. Do not swap collection for disbursement
-or invent bank payout endpoints. [Pine Labs portal](https://www.pinelabs.com/docs).
+Pine Labs now has verified public bank-payout contracts: POST `/payouts/v3/payments/banks`, GET `/payouts/v3/payments` and funding-account lookup. The prototype prepares these requests and ingests labelled documented responses; no payment is executed. See [payment integration](PAYMENTS.md) for exact source contracts, authority checks and sandbox requirements.
 
 Delhivery's [developer portal](https://one.delhivery.com/developer-portal/documents)
 and [Maps reference](https://www.delhivery.com/maps/reference) were the links in

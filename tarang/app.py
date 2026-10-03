@@ -18,6 +18,7 @@ from .group_monitor import GroupMonitor
 from .schema import GroupBatch
 from .public_demo import PublicDemo
 from .voice import VoiceDemo, Speech
+from .payments import Payments, BankBeneficiary, DocumentedPayoutResult
 
 
 def create_app(settings=None, model=None, telegram=None, run_worker=True):
@@ -342,6 +343,30 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
             return {"id": engine.add_evidence(body)}
         except ValueError as exc:
             raise HTTPException(409, str(exc)) from exc
+
+    @app.post("/api/payments/{operation_id}/prepare")
+    def payment_prepare(
+        operation_id: int,
+        body: BankBeneficiary,
+        authorization: str = Header(default=""),
+    ):
+        authorised(authorization)
+        try:
+            return Payments(store).prepare(operation_id, body)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from None
+
+    @app.post("/api/payments/{operation_id}/documented-result")
+    def payment_result(
+        operation_id: int,
+        body: DocumentedPayoutResult,
+        authorization: str = Header(default=""),
+    ):
+        authorised(authorization)
+        try:
+            return Payments(store).record(operation_id, body)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from None
 
     @app.post("/api/model-check")
     async def model_check(authorization: str = Header(default="")):
