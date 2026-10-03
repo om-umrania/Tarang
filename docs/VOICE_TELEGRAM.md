@@ -112,3 +112,12 @@ Recognition split the spoken year into “20 26”; the transcript and extracted
 preserved that wording. This is a concrete reason to retain transcript review,
 and is not a claim that date recognition is reliable. Human recording/noise,
 pronunciation and actual Telegram input remain separate acceptance checks.
+
+Voice-first commit `79f4f9283c7f703d2284081a7194f4a7497b3251` deployed as
+`dep-db0abs6gekts738rcjl0`, live at 06:52:41 UTC on 3 October. The actual Mac
+Telegram `/demo` turn displayed **Start with voice** as the first option at 12:23
+IST. Health returned 200; hosted `voice_configured` remains false. Local synthetic
+speech is working, but approval to copy the specific Gnani credential to Render
+is pending after automatic approval review rejected that transfer. No workaround
+or secret transmission was performed. The user-recorded Telegram audio test remains
+pending hosted activation. Private deployment/health receipts are under `.runtime/`.
