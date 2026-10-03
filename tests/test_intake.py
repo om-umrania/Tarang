@@ -277,7 +277,7 @@ def test_keyboard_selections_use_same_flow_and_respect_pending_answer(demo):
     assert not rows(demo, "demo_turns")
     demo.ingest(update(2, 42, "/talk"))
     assert facts(demo, 42)["phase"] == "collect"
-    demo.ingest(update(3, 42, "/choose 99"))
+    demo.ingest(update(3, 42, "/choose " + "9" * 5000))
     assert facts(demo, 42)["facts"]["problem"] == ""
     demo.ingest(update(4, 42, "/choose 1"))
     assert facts(demo, 42)["facts"]["problem"] == "Décor is delayed"

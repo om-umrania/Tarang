@@ -287,7 +287,8 @@ class PublicDemo:
                 state = Intake.read(db, cid)
                 number = command.removeprefix("/choose ").strip()
                 if (
-                    number.isascii()
+                    len(number) <= 2
+                    and number.isascii()
                     and number.isdigit()
                     and 1 <= int(number) <= len(Intake.choices(state))
                 ):

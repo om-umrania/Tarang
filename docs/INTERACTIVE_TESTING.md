@@ -87,3 +87,8 @@ numbered suggestions shown in each message. This uses the same choice validation
 as button taps and makes the flow usable with keyboard-only clients. Free-text
 answers and corrections remain available. `/talk` on first contact shows the
 privacy welcome before any model use.
+
+The corrected flow passed 58 SQLite runtime tests and all 23 public-demo/intake
+checks against an isolated local PostgreSQL server. The disposable server was
+stopped after the run. Oversized numeric selections are rejected before integer
+conversion; the keyboard-selection regression passes.
