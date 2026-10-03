@@ -17,3 +17,10 @@ The previous persona and experience design remains the reference in docs/.
 - [ ] Confirm source: direct business messages, existing group, or forwarded messages.
 - [ ] Configure approved Meta app/number/senders; verify actual message delivery and detection.
 - [ ] Assess existing-group support if that is the chosen source; no group access assumed.
+
+## Interactive persona iteration — 3 October 2026
+
+- Implement questions with suggested answers, free-text multi-field intake and corrections.
+- Rehearse plan review, simulated coordination and feedback with isolated demo state.
+- Validate contracts and live model; deploy on the existing free service.
+- Verify the actual Telegram client separately; record any concrete UI/access blocker.

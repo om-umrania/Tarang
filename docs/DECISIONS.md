@@ -115,3 +115,11 @@ Om chose “Private demo for each person” for visitors following the Telegram 
 Public visitors get isolated fictional scenarios and demo conversations, not access
 to the wedding workspace. Live actions remain unavailable in demo mode. Existing
 private-workspace authority is unchanged. See [public demo](PUBLIC_DEMO.md).
+
+### 3 October 2026 — interactive persona rehearsal
+
+Om confirmed that Tarang should ask useful questions with suggested answers, accept
+free-text input and corrections, and act within its authority while seeking feedback
+along the way. Om requested implementation and end-to-end testing in the real Telegram
+application. The public rehearsal adds conversational intake alongside the existing
+fictional scenarios. Selections record preferences, not live spending authority.

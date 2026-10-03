@@ -94,7 +94,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                             "answerCallbackQuery",
                             {
                                 "callback_query_id": update["callback_query"]["id"],
-                                "text": "Received; checking this proposal.",
+                                "text": "Received.",
                             },
                         )
                     with store.tx() as db:
@@ -189,7 +189,12 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     def health():
         with store.tx() as db:
             db.execute("SELECT 1")
-        return {"status": "ok", "prototype": True, "public_demo": settings.public_demo}
+        return {
+            "status": "ok",
+            "prototype": True,
+            "public_demo": settings.public_demo,
+            "interactive_demo": settings.public_demo,
+        }
 
     @app.get("/", response_class=HTMLResponse)
     def console():
@@ -218,7 +223,7 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
                     "answerCallbackQuery",
                     {
                         "callback_query_id": update["callback_query"]["id"],
-                        "text": "Received; checking this proposal.",
+                        "text": "Received.",
                     },
                 )
         return {"ok": True}
@@ -368,6 +373,25 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
             return {"ok": False, "code": code}
         except Exception as exc:
             return {"ok": False, "code": type(exc).__name__}
+
+    @app.post("/api/intake-check")
+    async def intake_check(authorization: str = Header(default="")):
+        authorised(authorization)
+        # Fixed fictional input only; never reads or mutates a visitor's session.
+        try:
+            reply = await engine.model.intake_reply(
+                {
+                    "mode": "fictional_private_demo",
+                    "facts": {},
+                    "history": [],
+                    "phase": "collect",
+                    "current_field": "problem",
+                    "question": "Fictional rehearsal: décor is delayed. Setup is due 12 November 2026 at 4 pm IST. Contact the fictional décor vendor. I approve changes; the venue coordinator verifies setup. Preserve the original design and budget. The deadline is the priority.",
+                }
+            )
+            return {"ok": True, "model": settings.model, "reply": reply.model_dump()}
+        except Exception:
+            return {"ok": False, "code": "intake_model_unavailable"}
 
     @app.post("/api/check")
     def check(body: CheckInput, authorization: str = Header(default="")):

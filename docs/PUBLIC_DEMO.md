@@ -102,3 +102,9 @@ The owner was asked to open the demo link and try its buttons; a real client
 round trip is still awaiting that confirmation. No paid plan was provisioned.
 The minimal deployment receipt is local and ignored in
 `.runtime/public-demo-deployment.json`.
+
+### Interactive conversation — 3 October 2026
+
+The menu now also offers **Start a conversation**: questions with suggested answers,
+free-text intake, plan corrections and a simulated contact/feedback loop. See
+[interactive testing](INTERACTIVE_TESTING.md) for behaviour, persistence and acceptance.

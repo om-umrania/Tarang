@@ -1,6 +1,7 @@
 """Isolated public rehearsal. No access to wedding records or execution tools."""
 
 import asyncio
+import json
 import time
 import uuid
 from datetime import datetime
@@ -9,6 +10,7 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel, ConfigDict, Field
 
 from .store import Store
+from .intake import Intake, QUESTIONS
 
 
 class DemoReply(BaseModel):
@@ -17,14 +19,15 @@ class DemoReply(BaseModel):
 
 
 MENU = [
+    [{"text": "Start a conversation", "callback_data": "demo:talk"}],
     [{"text": "Try décor rescue", "callback_data": "demo:decor"}],
     [{"text": "Try hamper delivery", "callback_data": "demo:courier"}],
 ]
 WELCOME = (
     "Hi, I'm Tarang, your AI wedding coordinator. Welcome to your private demo.\n\n"
-    "Try a fictional wedding problem below. Calls, vendor responses, approvals and "
+    "Choose Start a conversation for questions with suggested answers, or try a fictional wedding problem below. Calls, vendor responses, approvals and "
     "payments here are simulated; this demo cannot access any real wedding or WhatsApp group.\n\n"
-    "Choosing a scenario enables AI questions: your demo text and recent replies are "
+    "Choosing a conversation or scenario enables AI processing: your demo text and recent replies are "
     "processed through OpenRouter. Please use fictional details, not personal information. "
     "Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
     "/demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
@@ -126,6 +129,7 @@ class PublicDemo:
 
     @staticmethod
     def _clear(db, chat):
+        db.execute("DELETE FROM demo_intakes WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_turns WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_sessions WHERE chat=?", (chat,))
         # Only this chat's demo output. Never alter the private wedding workspace.
@@ -178,7 +182,11 @@ class PublicDemo:
                 "SELECT * FROM demo_sessions WHERE chat=?", (cid,)
             ).fetchone()
             is_owner = cid in self.settings.allowed
-            wants_demo = command in ("/demo", "/start demo") or data.startswith("demo:")
+            wants_demo = command in (
+                "/demo",
+                "/start demo",
+                "/start talk",
+            ) or data.startswith("demo:")
             if is_owner and not session and not wants_demo:
                 return False
             # /live is available even after the public feature is disabled.
@@ -225,7 +233,7 @@ class PublicDemo:
                     "This link provides a private demo only. It does not grant access to the owner's wedding.",
                 )
                 return True
-            if command in ("/reset", "/start", "/start demo"):
+            if command in ("/reset", "/start", "/start demo", "/start talk"):
                 self._clear(db, cid)
                 session = None
             if not session:
@@ -252,7 +260,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Private demo · no live actions. Choose a scenario, use its buttons, or ask an AI question after choosing. /reset clears the conversation; /delete removes stored demo data."
+                    "Private demo · no live actions. Choose a conversation with suggested answers, or a guided scenario. You can type answers and corrections in the conversation. /reset clears the conversation; /delete removes stored demo data."
                     + (
                         " /live returns to your restricted workspace."
                         if is_owner
@@ -261,7 +269,43 @@ class PublicDemo:
                     MENU,
                 )
                 return True
+            if data == "demo:talk":
+                generation = uuid.uuid4().hex
+                db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
+                db.execute(
+                    "UPDATE outbox SET state='cancelled' WHERE chat=? AND key LIKE 'demo:ai:%' AND state='pending'",
+                    (cid,),
+                )
+                db.execute(
+                    "UPDATE demo_sessions SET scenario='conversation',stage='intake',generation=?,consent=1 WHERE chat=?",
+                    (generation, cid),
+                )
+                Intake.start(db, key, cid)
+                return True
+            if data.startswith("demo:pick:"):
+                pending = db.execute(
+                    "SELECT 1 FROM demo_turns WHERE chat=? AND status IN ('pending','processing')",
+                    (cid,),
+                ).fetchone()
+                if pending:
+                    Store.message(
+                        db,
+                        key,
+                        cid,
+                        "I'm still processing your answer. Please wait for the next question.",
+                    )
+                elif session["scenario"] == "conversation":
+                    Intake.pick(db, key, cid, data)
+                else:
+                    Store.message(
+                        db,
+                        key,
+                        cid,
+                        "That conversation choice is no longer current. Use /demo.",
+                    )
+                return True
             if data in ("demo:decor", "demo:courier"):
+                db.execute("DELETE FROM demo_intakes WHERE chat=?", (cid,))
                 scenario = data.split(":")[1]
                 generation = uuid.uuid4().hex
                 db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
@@ -312,7 +356,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Choose a fictional scenario first to begin. Please review the privacy notice in /start.",
+                    "Choose Start a conversation or a fictional scenario first to begin. Please review the privacy notice in /start.",
                     MENU,
                 )
                 return True
@@ -345,6 +389,11 @@ class PublicDemo:
                     MENU,
                 )
                 return True
+            if session["scenario"] == "conversation":
+                state = Intake.read(db, cid)
+                Intake.save(
+                    db, cid, state
+                )  # invalidate buttons while free text is processed
             db.execute(
                 "INSERT INTO demo_turns(key,chat,generation,body,status,created) VALUES(?,?,?,?,'pending',?)",
                 (key, cid, session["generation"], text, now),
@@ -386,13 +435,24 @@ class PublicDemo:
                 db.execute(
                     "UPDATE demo_turns SET status='failed' WHERE key=?", (stale["key"],)
                 )
-                Store.message(
-                    db,
-                    "demo:ai:" + stale["key"],
-                    stale["chat"],
-                    "DEMO · That AI reply was interrupted. Please try your question again; the guided scenarios remain available.",
-                    MENU,
-                )
+                interrupted = "That AI reply was interrupted. Please try your answer again or use the suggestions."
+                intake = Intake.read(db, stale["chat"])
+                if intake:
+                    Intake.render(
+                        db,
+                        "demo:ai:" + stale["key"],
+                        stale["chat"],
+                        intake,
+                        interrupted,
+                    )
+                else:
+                    Store.message(
+                        db,
+                        "demo:ai:" + stale["key"],
+                        stale["chat"],
+                        "DEMO · " + interrupted,
+                        MENU,
+                    )
             # Cross-process lease serialises demo model calls without blocking the
             # private wedding worker, including during rolling deployments.
             if db.execute(
@@ -419,22 +479,42 @@ class PublicDemo:
                     (turn["chat"], turn["generation"]),
                 )
             ]
+            conversational = session["scenario"] == "conversation"
+            intake = Intake.read(db, turn["chat"]) if conversational else None
             context = {
                 "mode": "fictional_private_demo",
-                "scenario": SCENARIOS[session["scenario"]]["facts"],
-                "current_guided_step": SCENARIOS[session["scenario"]]["steps"][
-                    int(session["stage"])
-                ][0],
+                "scenario": (
+                    "User-supplied fictional problem"
+                    if conversational
+                    else SCENARIOS[session["scenario"]]["facts"]
+                ),
+                "current_guided_step": (
+                    "Conversation intake"
+                    if conversational
+                    else SCENARIOS[session["scenario"]]["steps"][int(session["stage"])][
+                        0
+                    ]
+                ),
                 "history": list(reversed(history)),
                 "question": turn["body"],
             }
+            if conversational:
+                context["facts"] = intake["facts"]
+                context["phase"] = intake["phase"]
+                context["current_field"] = next(
+                    (k for k in QUESTIONS if not intake["facts"][k]), None
+                )
             db.execute(
                 "UPDATE demo_turns SET status='processing',lease=? WHERE key=?",
                 (now + 60, turn["key"]),
             )
         try:
             async with asyncio.timeout(40):
-                result = await self.model.demo_reply(context)
+                result = await (
+                    self.model.intake_reply(context)
+                    if conversational
+                    else self.model.demo_reply(context)
+                )
             reply, status = result.message, "done"
         except Exception:
             reply, status = (
@@ -452,6 +532,18 @@ class PublicDemo:
                 "UPDATE demo_turns SET status=?,reply=? WHERE key=?",
                 (status, reply, turn["key"]),
             )
+            if conversational and status == "done":
+                Intake.apply(db, "demo:ai:" + turn["key"], turn["chat"], result)
+                return True
+            if conversational:
+                Intake.render(
+                    db,
+                    "demo:ai:" + turn["key"],
+                    turn["chat"],
+                    Intake.read(db, turn["chat"]),
+                    reply,
+                )
+                return True
             Store.message(
                 db,
                 "demo:ai:" + turn["key"],

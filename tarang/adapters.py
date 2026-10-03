@@ -29,6 +29,14 @@ class OpenRouter:
         ).read_text()
         return await self.structured(context, policy, DemoReply, max_tokens=1600)
 
+    async def intake_reply(self, context):
+        from .intake import IntakeReply
+
+        policy = (
+            Path(__file__).resolve().parent.parent / "prompts/intake.md"
+        ).read_text()
+        return await self.structured(context, policy, IntakeReply, max_tokens=1800)
+
     async def detect_conflicts(self, context):
         from .schema import ConflictReport
 
