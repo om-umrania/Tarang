@@ -24,3 +24,22 @@ The previous persona and experience design remains the reference in docs/.
 - Rehearse plan review, simulated coordination and feedback with isolated demo state.
 - Validate contracts and live model; deploy on the existing free service.
 - Verify the actual Telegram client separately; record any concrete UI/access blocker.
+
+## Voice-first Telegram iteration — 3 October 2026
+
+- [x] Voice notes, reviewed transcript and shared intake/feedback path.
+- [x] Generated OGG voice replies with text/buttons retained.
+- [x] Consent, limits, failure/cancellation and SQLite/PostgreSQL contract checks.
+- [ ] Configure speech access privately and run synthetic Gnani speech probe.
+- [ ] Verify real Telegram recording, transcription, correction and spoken playback.
+
+
+## Payments iteration — 3 October 2026
+
+- [x] Read Muskan's Round 3 email, both scenario/design attachments, and rail FAQ.
+- [x] Verify Pine Labs bank payout, status, funding and authentication OpenAPI.
+- [x] Implement operator-only request preparation and documented-response loop.
+- [x] Add authority, beneficiary, reference, intermediate/terminal-state tests.
+- [ ] Configure sandbox merchant/Payouts entitlement, funding and beneficiary.
+- [ ] Build and verify sandbox dispatch/reconciliation before considering live mode.
+- [ ] Record an actual model-led complete rail journey with real-source events.

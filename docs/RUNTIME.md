@@ -156,3 +156,8 @@ bridge and persisted hourly review worker. The group monitor defaults off until 
 and exact group ID/token configuration are complete. Its review feeds Telegram context;
 it does not depend on Codex running or manual chat exports. Timely runs require awake
 compute and a connected, supervised bridge with durable storage.
+
+## Telegram voice
+
+[VOICE_TELEGRAM.md](VOICE_TELEGRAM.md) documents optional voice notes and generated
+spoken replies in the fictional conversation. Live speech access remains pending.

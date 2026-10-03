@@ -19,18 +19,19 @@ class DemoReply(BaseModel):
 
 
 MENU = [
+    [{"text": "Start with voice", "callback_data": "demo:voice"}],
     [{"text": "Start a conversation", "callback_data": "demo:talk"}],
     [{"text": "Try décor rescue", "callback_data": "demo:decor"}],
     [{"text": "Try hamper delivery", "callback_data": "demo:courier"}],
 ]
 WELCOME = (
     "Hi, I'm Tarang, your AI wedding coordinator. Welcome to your private demo.\n\n"
-    "Choose Start a conversation for questions with suggested answers, or try a fictional wedding problem below. Calls, vendor responses, approvals and "
+    "Choose Start with voice to talk to me and hear my replies. You can also use text and suggested answers, or try a fictional wedding problem below. Calls, vendor responses, approvals and "
     "payments here are simulated; this demo cannot access any real wedding or WhatsApp group.\n\n"
     "Choosing a conversation or scenario enables AI processing: your demo text and recent replies are "
     "processed through OpenRouter. Please use fictional details, not personal information. "
-    "Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
-    "/talk: conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
+    "Choosing Start with voice or /voice enables Gnani processing of your recordings and reply text. I show the transcript for you to check before continuing. Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
+    "/voice: voice conversation · /talk: text conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
     "· /privacy: data details. Free hosting may take a moment to wake up."
 )
 SCENARIOS = {
@@ -124,11 +125,14 @@ SCENARIOS = {
 
 
 class PublicDemo:
-    def __init__(self, store, settings, model):
+    def __init__(self, store, settings, model, voice=None):
         self.store, self.settings, self.model = store, settings, model
+        self.voice = voice
 
     @staticmethod
     def _clear(db, chat):
+        db.execute("DELETE FROM voice_jobs WHERE chat=?", (chat,))
+        db.execute("DELETE FROM voice_preferences WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_intakes WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_turns WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_sessions WHERE chat=?", (chat,))
@@ -186,6 +190,10 @@ class PublicDemo:
                 "/demo",
                 "/start demo",
                 "/start talk",
+                "/start voice",
+                "/voice",
+                "/voice en-in",
+                "/voice hi-in",
                 "/talk",
             ) or data.startswith("demo:")
             if is_owner and not session and not wants_demo:
@@ -223,7 +231,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Your demo is separate from other visitors and the owner's wedding. The service operator can access stored demo data. AI questions send your text, fictional scenario and recent replies to OpenRouter; never send secrets or personal wedding data. Stored demo data expires after 7 days of inactivity while the service runs. /delete clears it now; provider records, hosting backups and Telegram messages have separate retention. No real calls, bookings, payments or background monitoring run in this demo.",
+                    "Your demo is separate from other visitors and the owner's wedding. The service operator can access stored demo data. AI questions send your text, fictional scenario and recent replies to OpenRouter; never send secrets or personal wedding data. Optional /voice uses Gnani for recordings and generated speech; audio is processed transiently, while transcripts follow demo retention. Stored demo data expires after 7 days of inactivity while the service runs. /delete clears it now; provider records, hosting backups and Telegram messages have separate retention. No real calls, bookings, payments or background monitoring run in this demo.",
                 )
                 return True
             if command == "/live":
@@ -234,7 +242,13 @@ class PublicDemo:
                     "This link provides a private demo only. It does not grant access to the owner's wedding.",
                 )
                 return True
-            if command in ("/reset", "/start", "/start demo", "/start talk"):
+            if command in (
+                "/reset",
+                "/start",
+                "/start demo",
+                "/start talk",
+                "/start voice",
+            ):
                 self._clear(db, cid)
                 session = None
             if not session:
@@ -256,6 +270,62 @@ class PublicDemo:
                 Store.message(db, key, cid, WELCOME, MENU)
                 return True
             db.execute("UPDATE demo_sessions SET updated=? WHERE chat=?", (now, cid))
+            voice_entry = data == "demo:voice" or command in {
+                "/voice",
+                "/voice en-in",
+                "/voice hi-in",
+            }
+            if voice_entry and self.voice:
+                if not self.settings.speech_key:
+                    Store.message(
+                        db,
+                        key,
+                        cid,
+                        "Voice service is not configured yet. Start a text conversation or try the suggested scenarios.",
+                        MENU,
+                    )
+                    return True
+                # The welcome already names both speech and model processing.
+                # Choosing voice begins the conversation without a /talk prerequisite.
+                if session["scenario"] != "conversation":
+                    generation = uuid.uuid4().hex
+                    db.execute("DELETE FROM voice_jobs WHERE chat=?", (cid,))
+                    db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
+                    db.execute(
+                        "UPDATE outbox SET state='cancelled' WHERE chat=? AND key LIKE 'demo:ai:%' AND state='pending'",
+                        (cid,),
+                    )
+                    db.execute(
+                        "UPDATE demo_sessions SET scenario='conversation',stage='intake',generation=?,consent=1 WHERE chat=?",
+                        (generation, cid),
+                    )
+                    session = db.execute(
+                        "SELECT * FROM demo_sessions WHERE chat=?", (cid,)
+                    ).fetchone()
+                    Intake.start(db, key + ":voice-question", cid)
+                self.voice.handle(
+                    db,
+                    key,
+                    cid,
+                    session,
+                    {},
+                    "",
+                    command if command else "/voice",
+                    self._quota,
+                )
+                if session["scenario"] == "conversation":
+                    Intake.render(
+                        db,
+                        key + ":voice-question",
+                        cid,
+                        Intake.read(db, cid),
+                        "You can answer with a voice note, text, or the suggestions below.",
+                    )
+                return True
+            if self.voice and self.voice.handle(
+                db, key, cid, session, message, data, command, self._quota
+            ):
+                return True
             if command in ("/demo", "/help", "/status"):
                 Store.message(
                     db,
@@ -271,6 +341,7 @@ class PublicDemo:
                 )
                 return True
             if data == "demo:talk" or command == "/talk":
+                db.execute("DELETE FROM voice_jobs WHERE chat=?", (cid,))
                 generation = uuid.uuid4().hex
                 db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
                 db.execute(
@@ -292,7 +363,7 @@ class PublicDemo:
                     and number.isdigit()
                     and 1 <= int(number) <= len(Intake.choices(state))
                 ):
-                    data = f"demo:pick:{state['revision']}:{int(number)-1}"
+                    data = f"demo:pick:{state['revision']}:{int(number) - 1}"
                 else:
                     Intake.render(
                         db,
@@ -325,6 +396,12 @@ class PublicDemo:
                     )
                 return True
             if data in ("demo:decor", "demo:courier"):
+                db.execute("DELETE FROM voice_jobs WHERE chat=?", (cid,))
+                db.execute("DELETE FROM voice_preferences WHERE chat=?", (cid,))
+                db.execute(
+                    "UPDATE outbox SET state='cancelled' WHERE chat=? AND key LIKE 'demo:speech:%' AND state='pending'",
+                    (cid,),
+                )
                 db.execute("DELETE FROM demo_intakes WHERE chat=?", (cid,))
                 scenario = data.split(":")[1]
                 generation = uuid.uuid4().hex
@@ -385,7 +462,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Send a text question up to 2,000 characters, or use /demo, /reset, /privacy or /delete. Voice notes and files are not processed.",
+                    "Send a text question up to 2,000 characters, or use /demo, /reset, /privacy or /delete. For voice notes, start /talk then enable /voice. Other files are not processed.",
                 )
                 return True
             pending = db.execute(
@@ -428,7 +505,7 @@ class PublicDemo:
             if label
             else MENU
         )
-        Store.message(db, key, chat, "DEMO · fictional scenario\n\n" + text, buttons)
+        Store.message(db, key, chat, text, buttons)
 
     def cleanup(self):
         cutoff = time.time() - 7 * 86400
@@ -470,7 +547,7 @@ class PublicDemo:
                         db,
                         "demo:ai:" + stale["key"],
                         stale["chat"],
-                        "DEMO · " + interrupted,
+                        interrupted,
                         MENU,
                     )
             # Cross-process lease serialises demo model calls without blocking the
@@ -568,7 +645,7 @@ class PublicDemo:
                 db,
                 "demo:ai:" + turn["key"],
                 turn["chat"],
-                "DEMO · AI explanation, no live actions\n\n" + reply,
+                reply,
                 MENU,
             )
         return True
