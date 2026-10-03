@@ -3,6 +3,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+if ! command -v node >/dev/null 2>&1; then
+    echo 'ERROR: Node.js 22.13+ must be available on PATH to run JavaScript checks and bridge filter tests.' >&2
+    exit 1
+fi
+
 python3 - <<'PY'
 from html.parser import HTMLParser
 from pathlib import Path
@@ -65,5 +70,6 @@ print('PASS: review JavaScript syntax, unique HTML IDs, and local document links
 print('Static checks passed. Runtime contract tests follow; live integrations require separate evidence.')
 PY
 
+node --test bridge/filter.test.mjs
 python3 -m pytest -q
 git diff --check
