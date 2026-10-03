@@ -84,7 +84,7 @@ def last(demo):
 def test_voice_confirm_then_existing_intake_and_spoken_reply(demo, monkeypatch):
     start(demo)
     demo.ingest(update(3, text="/voice"))
-    assert "Gnani" in last(demo)["text"]
+    assert any("Gnani" in r["payload"] for r in rows(demo, "outbox"))
     demo.ingest(note())
     demo.ingest(note())  # actual Telegram duplicate
     asyncio.run(demo.voice.step())
@@ -330,3 +330,33 @@ def test_signed_webhook_accepts_voice_and_preserves_authority(demo_database):
         with app.state.demo.store.tx() as db:
             assert not db.execute("SELECT 1 FROM operations").fetchone()
             assert not db.execute("SELECT 1 FROM commitments").fetchone()
+
+
+def test_voice_first_entry_from_welcome_and_existing_plan(demo):
+    demo.ingest(update(1, text="/start voice"))
+    buttons = last(demo)["reply_markup"]["inline_keyboard"]
+    assert buttons[0][0]["text"] == "Start with voice"
+    assert not rows(demo, "voice_preferences")
+    demo.ingest(update(2, callback="demo:voice"))
+    assert rows(demo, "voice_preferences")[0]["language"] == "en-IN"
+    with demo.store.tx() as db:
+        state = Intake.read(db, 101)
+        assert state["phase"] == "collect"
+    demo.ingest(update(3, text="/choose 1"))
+    demo.ingest(update(4, text="/voice hi-IN"))
+    with demo.store.tx() as db:
+        assert Intake.read(db, 101)["facts"]["problem"] == "Décor is delayed"
+    assert rows(demo, "voice_preferences")[0]["language"] == "hi-IN"
+    assert "voice note" in last(demo)["text"]
+
+
+def test_voice_first_missing_key_and_owner_routing(demo):
+    demo.settings.allowed = frozenset({101})
+    assert demo.ingest(update(1, text="/voice"))
+    assert not rows(demo, "voice_preferences")
+    assert "Gnani" in last(demo)["text"]
+    demo.settings.speech_key = ""
+    demo.ingest(update(2, callback="demo:voice"))
+    assert "not configured" in last(demo)["text"]
+    assert not rows(demo, "voice_preferences")
+    assert not rows(demo, "commitments")

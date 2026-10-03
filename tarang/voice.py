@@ -119,7 +119,7 @@ class VoiceDemo:
                     db,
                     key,
                     chat,
-                    "Start the fictional conversation with /talk, then use /voice to enable voice.",
+                    "Choose Start with voice or send /voice to start a fictional voice conversation.",
                 )
             elif arg and arg not in {"en-in", "hi-in"}:
                 Store.message(
@@ -205,7 +205,7 @@ class VoiceDemo:
                 db,
                 key,
                 chat,
-                "Use /talk then /voice to enable transcription. This recording has not been downloaded or processed.",
+                "Choose Start with voice or send /voice to enable transcription. This recording has not been downloaded or processed.",
             )
             return True
         size, duration, file_id = (
@@ -354,7 +354,7 @@ class VoiceDemo:
                     job["chat"],
                     "I heard:\n\n"
                     + transcript.strip()
-                    + "\n\nIs this accurate? Check names, amounts and times. Tap Use this transcript or send /heard to continue. /discard rejects it; you can also type a corrected answer.",
+                    + "\n\nIs this accurate? Check names, dates, years, amounts and times. Tap Use this transcript or send /heard to continue. /discard rejects it; you can also type a corrected answer.",
                     buttons,
                 )
         return True

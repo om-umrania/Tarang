@@ -19,18 +19,19 @@ class DemoReply(BaseModel):
 
 
 MENU = [
+    [{"text": "Start with voice", "callback_data": "demo:voice"}],
     [{"text": "Start a conversation", "callback_data": "demo:talk"}],
     [{"text": "Try décor rescue", "callback_data": "demo:decor"}],
     [{"text": "Try hamper delivery", "callback_data": "demo:courier"}],
 ]
 WELCOME = (
     "Hi, I'm Tarang, your AI wedding coordinator. Welcome to your private demo.\n\n"
-    "Choose Start a conversation for questions with suggested answers, or try a fictional wedding problem below. Calls, vendor responses, approvals and "
+    "Choose Start with voice to talk to me and hear my replies. You can also use text and suggested answers, or try a fictional wedding problem below. Calls, vendor responses, approvals and "
     "payments here are simulated; this demo cannot access any real wedding or WhatsApp group.\n\n"
     "Choosing a conversation or scenario enables AI processing: your demo text and recent replies are "
     "processed through OpenRouter. Please use fictional details, not personal information. "
-    "Optional /voice mode sends recordings and reply text to Gnani for speech processing after you enable it. Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
-    "/talk: conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
+    "Choosing Start with voice or /voice enables Gnani processing of your recordings and reply text. I show the transcript for you to check before continuing. Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
+    "/voice: voice conversation · /talk: text conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
     "· /privacy: data details. Free hosting may take a moment to wake up."
 )
 SCENARIOS = {
@@ -189,6 +190,10 @@ class PublicDemo:
                 "/demo",
                 "/start demo",
                 "/start talk",
+                "/start voice",
+                "/voice",
+                "/voice en-in",
+                "/voice hi-in",
                 "/talk",
             ) or data.startswith("demo:")
             if is_owner and not session and not wants_demo:
@@ -237,7 +242,13 @@ class PublicDemo:
                     "This link provides a private demo only. It does not grant access to the owner's wedding.",
                 )
                 return True
-            if command in ("/reset", "/start", "/start demo", "/start talk"):
+            if command in (
+                "/reset",
+                "/start",
+                "/start demo",
+                "/start talk",
+                "/start voice",
+            ):
                 self._clear(db, cid)
                 session = None
             if not session:
@@ -259,6 +270,58 @@ class PublicDemo:
                 Store.message(db, key, cid, WELCOME, MENU)
                 return True
             db.execute("UPDATE demo_sessions SET updated=? WHERE chat=?", (now, cid))
+            voice_entry = data == "demo:voice" or command in {
+                "/voice",
+                "/voice en-in",
+                "/voice hi-in",
+            }
+            if voice_entry and self.voice:
+                if not self.settings.speech_key:
+                    Store.message(
+                        db,
+                        key,
+                        cid,
+                        "Voice service is not configured yet. Start a text conversation or try the suggested scenarios.",
+                        MENU,
+                    )
+                    return True
+                # The welcome already names both speech and model processing.
+                # Choosing voice begins the conversation without a /talk prerequisite.
+                if session["scenario"] != "conversation":
+                    generation = uuid.uuid4().hex
+                    db.execute("DELETE FROM voice_jobs WHERE chat=?", (cid,))
+                    db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
+                    db.execute(
+                        "UPDATE outbox SET state='cancelled' WHERE chat=? AND key LIKE 'demo:ai:%' AND state='pending'",
+                        (cid,),
+                    )
+                    db.execute(
+                        "UPDATE demo_sessions SET scenario='conversation',stage='intake',generation=?,consent=1 WHERE chat=?",
+                        (generation, cid),
+                    )
+                    session = db.execute(
+                        "SELECT * FROM demo_sessions WHERE chat=?", (cid,)
+                    ).fetchone()
+                    Intake.start(db, key + ":voice-question", cid)
+                self.voice.handle(
+                    db,
+                    key,
+                    cid,
+                    session,
+                    {},
+                    "",
+                    command if command else "/voice",
+                    self._quota,
+                )
+                if session["scenario"] == "conversation":
+                    Intake.render(
+                        db,
+                        key + ":voice-question",
+                        cid,
+                        Intake.read(db, cid),
+                        "You can answer with a voice note, text, or the suggestions below.",
+                    )
+                return True
             if self.voice and self.voice.handle(
                 db, key, cid, session, message, data, command, self._quota
             ):

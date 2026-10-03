@@ -1,13 +1,16 @@
 # Telegram voice conversation
 
-3 October 2026. Implementation and automated contracts are complete. Live Gnani
-speech and a real Telegram voice round trip await a configured speech credential.
+3 October 2026. Voice is the primary Telegram entry point. Local live Gnani speech
+works with the privately supplied credential; hosted activation and a real Telegram
+voice round trip are being verified.
 Calls are a separate integration; this version uses asynchronous voice notes.
 
 ## Conversation
 
-1. Open [Tarang](https://t.me/tarang_wedding_bot?start=demo), send `/start demo`, then `/talk`.
-2. Send `/voice` (English) or `/voice hi-IN` (Hindi recognition). This opts into
+1. Open [Tarang voice](https://t.me/tarang_wedding_bot?start=voice), send `/start voice`,
+   then choose **Start with voice**. Text and guided scenarios remain available.
+2. `/voice` also starts voice directly after the welcome; `/talk` is no longer a
+   prerequisite. Use `/voice hi-IN` for Hindi recognition. This opts into
    Gnani processing of recordings and reply text. Use fictional details only.
 3. Record a Telegram voice note, ideally 30 seconds, maximum 60 seconds and 10 MB.
 4. Tarang displays **I heard** with the transcript. Check names, times and amounts.
@@ -66,7 +69,7 @@ add latency; this is not a streaming call experience.
 
 ## Verification and next live acceptance
 
-72 runtime tests and static checks passed. All 37 public-demo/intake/voice checks
+74 runtime tests and static checks passed. All 37 public-demo/intake/voice checks
 passed against disposable PostgreSQL. Fourteen voice tests cover opt-in, limits,
 identity/isolation, confirmation, correction, reset/delete/off races, provider/crash
 failure, quotas, spoken output, ambiguous sends, HTTP contracts and a signed webhook
@@ -74,7 +77,7 @@ through intake. Fake audio and fake providers establish contracts, not speech qu
 
 Run `.venv/bin/python scripts/evaluate_voice.py` after configuring the key. This uses
 only synthetic TTS audio and checks a live STT round trip, saving an ignored private
-receipt. It currently reports missing credential without making a speech request.
+receipt. The live synthetic speech round trip passed after the key was configured locally.
 Then use the real Telegram client to record a fictional problem, verify transcription,
 confirm it, listen to the spoken question, correct a date, and finish feedback.
 Check quiet/noisy audio, names/amounts, Hindi/mixed speech, and failed-provider fallback
@@ -89,3 +92,23 @@ Hosted health returned 200 and `voice_configured: false`. A real Mac Telegram
 the reply was recorded `sent`, and the webhook backlog was zero. This confirms
 routing and honest fallback, not a successful audio interaction. Private receipt:
 `.runtime/telegram-voice-readiness.json`. GNANI_API_KEY remains the live-test blocker.
+
+### Voice-first entry iteration
+
+The welcome now puts **Start with voice** first, with a `?start=voice` link. A
+selection enables speech processing, starts conversational intake, and speaks the
+first question. `/voice` can also enter directly; switching a text conversation to
+voice preserves its facts. Initial welcome still precedes any model/audio processing.
+Two additional regression cases verify the primary entry, consent, owner routing,
+missing-key fallback and preservation of an existing plan.
+
+`scripts/evaluate_voice_pipeline.py` verifies the live synthetic STT/review/model/TTS
+path in an isolated database with captured Telegram input/delivery. It never reads
+user recordings or private wedding state and does not establish a client round trip.
+Private receipt: `.runtime/voice-pipeline-evaluation.json`.
+
+The complete local synthetic voice pipeline passed with real Gnani and OpenRouter.
+Recognition split the spoken year into “20 26”; the transcript and extracted fact
+preserved that wording. This is a concrete reason to retain transcript review,
+and is not a claim that date recognition is reliable. Human recording/noise,
+pronunciation and actual Telegram input remain separate acceptance checks.

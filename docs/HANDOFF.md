@@ -125,3 +125,12 @@ for the fictional conversation. `/talk` then `/voice` opts in; `/heard` confirms
 `/discard` rejects, `/voice off` returns to text. 72 runtime checks and 37 PostgreSQL
 public-demo/intake/voice checks pass. Live speech and actual Telegram audio remain
 blocked on missing GNANI_API_KEY. See [VOICE_TELEGRAM.md](VOICE_TELEGRAM.md).
+
+### Voice-first follow-up
+
+Om supplied the Gnani key privately in local `.env`; a real synthetic TTS/STT test
+and an isolated live STT/review/OpenRouter/TTS pipeline passed. The welcome now
+puts **Start with voice** first; `/voice` starts directly after the welcome and
+preserves existing text-conversation facts. 74 runtime tests pass. Hosted key
+configuration is awaiting explicit permission to copy the credential to Render.
+See [voice evidence](VOICE_TELEGRAM.md); the real Telegram audio round trip is pending.
