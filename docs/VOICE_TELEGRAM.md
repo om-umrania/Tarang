@@ -79,3 +79,13 @@ Then use the real Telegram client to record a fictional problem, verify transcri
 confirm it, listen to the spoken question, correct a date, and finish feedback.
 Check quiet/noisy audio, names/amounts, Hindi/mixed speech, and failed-provider fallback
 before promoting voice quality. The full persona rubric remains separately unexecuted.
+
+### Deployed readiness check
+
+Commit `b2de1413435d6281032521deea4201e43f8281d9` was deployed to the existing free
+service as `dep-db0a52mgekts738qj3i0`, live at 06:37:57 UTC on 3 October.
+Hosted health returned 200 and `voice_configured: false`. A real Mac Telegram
+`/voice` turn at 12:08 IST displayed the explicit missing-configuration message;
+the reply was recorded `sent`, and the webhook backlog was zero. This confirms
+routing and honest fallback, not a successful audio interaction. Private receipt:
+`.runtime/telegram-voice-readiness.json`. GNANI_API_KEY remains the live-test blocker.
