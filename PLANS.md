@@ -24,3 +24,11 @@ The previous persona and experience design remains the reference in docs/.
 - Rehearse plan review, simulated coordination and feedback with isolated demo state.
 - Validate contracts and live model; deploy on the existing free service.
 - Verify the actual Telegram client separately; record any concrete UI/access blocker.
+
+## Voice-first Telegram iteration — 3 October 2026
+
+- [x] Voice notes, reviewed transcript and shared intake/feedback path.
+- [x] Generated OGG voice replies with text/buttons retained.
+- [x] Consent, limits, failure/cancellation and SQLite/PostgreSQL contract checks.
+- [ ] Configure speech access privately and run synthetic Gnani speech probe.
+- [ ] Verify real Telegram recording, transcription, correction and spoken playback.

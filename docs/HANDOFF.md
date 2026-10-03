@@ -117,3 +117,11 @@ No WhatsApp credentials configured or actual WhatsApp conversation connected yet
 Two synthetic live OpenRouter conflict probes passed: contradictory setup times flagged
 with source quotes; agreeing times produced no conflict. This is model evidence, not
 a live WhatsApp delivery test. Local receipt: `.runtime/whatsapp-synthetic-eval.json`.
+
+## Telegram voice implementation — 3 October 2026
+
+Voice-note input, transcript confirmation/correction and spoken replies are implemented
+for the fictional conversation. `/talk` then `/voice` opts in; `/heard` confirms,
+`/discard` rejects, `/voice off` returns to text. 72 runtime checks and 37 PostgreSQL
+public-demo/intake/voice checks pass. Live speech and actual Telegram audio remain
+blocked on missing GNANI_API_KEY. See [VOICE_TELEGRAM.md](VOICE_TELEGRAM.md).

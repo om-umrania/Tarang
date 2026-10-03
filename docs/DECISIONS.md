@@ -123,3 +123,11 @@ free-text input and corrections, and act within its authority while seeking feed
 along the way. Om requested implementation and end-to-end testing in the real Telegram
 application. The public rehearsal adds conversational intake alongside the existing
 fictional scenarios. Selections record preferences, not live spending authority.
+
+### 3 October 2026 — voice interaction
+
+Om requested a voice-first agent and authorised Telegram voice interaction as the
+minimum if calling is not connected. Implemented voice-note input, reviewed
+transcripts and generated voice replies for the fictional conversation using Gnani's
+documented speech APIs. Live speech access is not configured yet; no calling or
+real vendor authority is inferred. See [Telegram voice](VOICE_TELEGRAM.md).

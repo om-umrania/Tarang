@@ -25,6 +25,10 @@ def whatsapp_routes_from_env():
 
 @dataclass
 class Settings:
+    speech_key: str = field(default_factory=lambda: os.getenv("GNANI_API_KEY", ""))
+    speech_voice: str = field(
+        default_factory=lambda: os.getenv("GNANI_VOICE", "Kaveri")
+    )
     public_demo: bool = field(
         default_factory=lambda: os.getenv("PUBLIC_DEMO_ENABLED", "false") == "true"
     )

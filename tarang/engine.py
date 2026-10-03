@@ -473,7 +473,7 @@ class Engine:
                         )
                         if status == "approval":
                             notes.append(
-                                f"Approval #{oid}: {op.kind} · {op.recipient}\nINR {op.amount_paise/100:.2f} · {op.category}\n{op.specification}\nValid for {op.expires_in_seconds//60} minutes. Operator-assisted; approval does not execute a real transaction."
+                                f"Approval #{oid}: {op.kind} · {op.recipient}\nINR {op.amount_paise / 100:.2f} · {op.category}\n{op.specification}\nValid for {op.expires_in_seconds // 60} minutes. Operator-assisted; approval does not execute a real transaction."
                             )
                             buttons = [
                                 [
@@ -512,7 +512,7 @@ class Engine:
                 if notes:
                     text += "\n\n" + "\n".join(notes)
                 if state == "open":
-                    text += f'\n\nNext check saved: {datetime.fromtimestamp(now+d.next_check_seconds,ZoneInfo(self.settings.timezone)).strftime("%d %b %H:%M:%S %Z")}. '
+                    text += f"\n\nNext check saved: {datetime.fromtimestamp(now + d.next_check_seconds, ZoneInfo(self.settings.timezone)).strftime('%d %b %H:%M:%S %Z')}. "
                 if self.settings.free_host and state == "open":
                     text += "Free-host checks may run late if the service is asleep."
                 Store.message(
@@ -580,12 +580,89 @@ class Engine:
             row = dict(row)
             db.execute("UPDATE outbox SET state='sending' WHERE id=?", (row["id"],))
         state = "sent"
+        payload = json.loads(row["payload"])
+        is_speech = "speech_text" in payload
+        if is_speech:
+            # Recheck opt-in and scenario at dispatch, including after reset/off.
+            with self.store.tx() as db:
+                eligible = db.execute(
+                    "SELECT 1 FROM voice_preferences p JOIN demo_sessions s ON s.chat=p.chat WHERE p.chat=? AND s.scenario='conversation' AND s.generation=?",
+                    (row["chat"], payload["generation"]),
+                ).fetchone()
+            if not eligible or not self.settings.public_demo:
+                with self.store.tx() as db:
+                    db.execute(
+                        "UPDATE outbox SET state='cancelled' WHERE id=?", (row["id"],)
+                    )
+                return True
+            try:
+                from .voice import Speech
+
+                audio = await Speech(self.settings).synthesize(
+                    payload["speech_text"], payload["language"]
+                )
+            except Exception:
+                with self.store.tx() as db:
+                    db.execute(
+                        "UPDATE outbox SET state='failed' WHERE id=?", (row["id"],)
+                    )
+                    Store.message(
+                        db,
+                        row["key"] + ":fallback",
+                        row["chat"],
+                        "I couldn't generate the voice reply. The complete text and suggested answers remain above.",
+                    )
+                return True
+            with self.store.tx() as db:
+                eligible = db.execute(
+                    "SELECT 1 FROM voice_preferences p JOIN demo_sessions s ON s.chat=p.chat JOIN outbox o ON o.chat=s.chat WHERE o.id=? AND o.state='sending' AND s.generation=? AND s.scenario='conversation'",
+                    (row["id"], payload["generation"]),
+                ).fetchone()
+            if not eligible:
+                with self.store.tx() as db:
+                    db.execute(
+                        "UPDATE outbox SET state='cancelled' WHERE id=? AND state='sending'",
+                        (row["id"],),
+                    )
+                return True
         try:
-            await self.telegram.call("sendMessage", json.loads(row["payload"]))
+            if is_speech:
+                await self.telegram.send_voice(row["chat"], audio)
+            else:
+                await self.telegram.call("sendMessage", payload)
         except Exception:
             state = "unknown"
         with self.store.tx() as db:
             db.execute("UPDATE outbox SET state=? WHERE id=?", (state, row["id"]))
+            if (
+                state == "sent"
+                and not is_speech
+                and row["key"].startswith("demo:")
+                and not row["key"].endswith(":fallback")
+                and self.settings.public_demo
+                and self.settings.speech_key
+            ):
+                pref = db.execute(
+                    "SELECT p.language,s.generation FROM voice_preferences p JOIN demo_sessions s ON s.chat=p.chat WHERE p.chat=? AND s.scenario='conversation'",
+                    (row["chat"],),
+                ).fetchone()
+                if pref:
+                    from .public_demo import PublicDemo
+
+                    if PublicDemo._quota(db, row["chat"], "tts", time.time(), 20, 200):
+                        speech_payload = {
+                            "speech_text": payload["text"],
+                            "language": pref["language"],
+                            "generation": pref["generation"],
+                        }
+                        db.execute(
+                            "INSERT OR IGNORE INTO outbox(key,chat,payload) VALUES(?,?,?)",
+                            (
+                                "demo:speech:" + row["key"],
+                                row["chat"],
+                                json.dumps(speech_payload),
+                            ),
+                        )
             Store.log(
                 db, None, "telegram_delivery", {"outbox_id": row["id"], "state": state}
             )

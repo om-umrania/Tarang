@@ -101,3 +101,46 @@ class Telegram:
             if response.status_code != 200 or not response.json().get("ok"):
                 raise RuntimeError(f"telegram_http_{response.status_code}")
             return response.json()["result"]
+
+    async def download_voice(self, file_id, limit):
+        info = await self.call("getFile", {"file_id": file_id})
+        path = info.get("file_path", "")
+        if (
+            not isinstance(path, str)
+            or not path
+            or ".." in path
+            or path.startswith("/")
+            or not all(c.isalnum() or c in "_-/ ." for c in path)
+            or " " in path
+        ):
+            raise RuntimeError("telegram_invalid_file")
+        if info.get("file_size", 0) > limit:
+            raise RuntimeError("telegram_file_too_large")
+        async with httpx.AsyncClient(timeout=20) as client:
+            async with client.stream(
+                "GET", f"https://api.telegram.org/file/bot{self.token}/{path}"
+            ) as response:
+                if response.status_code != 200:
+                    raise RuntimeError("telegram_file_error")
+                content = bytearray()
+                async for chunk in response.aiter_bytes():
+                    content.extend(chunk)
+                    if len(content) > limit:
+                        raise RuntimeError("telegram_file_too_large")
+        if not content:
+            raise RuntimeError("telegram_empty_audio")
+        return bytes(content)
+
+    async def send_voice(self, chat, audio):
+        async with httpx.AsyncClient(timeout=40) as client:
+            response = await client.post(
+                f"https://api.telegram.org/bot{self.token}/sendVoice",
+                data={
+                    "chat_id": str(chat),
+                    "caption": "AI-generated Tarang voice · fictional demo. Full text and choices are in the chat.",
+                },
+                files={"voice": ("tarang.ogg", audio, "audio/ogg")},
+            )
+        if response.status_code != 200 or not response.json().get("ok"):
+            raise RuntimeError("telegram_voice_error")
+        return response.json()["result"]

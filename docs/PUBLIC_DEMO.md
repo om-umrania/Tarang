@@ -54,7 +54,7 @@ uses calendar-day granularity, so counters can remain for up to eight days.
 
 - 10 AI questions per visitor per day, 100 total per day; failures count.
 - One pending question per visitor and one demo model request in flight globally.
-- At most 2,000 characters per AI question; files/voice notes are not processed.
+- At most 2,000 characters per AI question; other files are not processed. Optional `/voice` supports reviewed Telegram voice notes in the conversation; see [voice setup](VOICE_TELEGRAM.md).
 - 100 inputs per visitor / 2,000 total daily; excess inputs are silently dropped
   to bound response amplification. `/delete` still clears data at the input cap.
 - 1,000 stored demo sessions maximum. Daily limits reset at midnight Asia/Kolkata.

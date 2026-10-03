@@ -29,7 +29,7 @@ WELCOME = (
     "payments here are simulated; this demo cannot access any real wedding or WhatsApp group.\n\n"
     "Choosing a conversation or scenario enables AI processing: your demo text and recent replies are "
     "processed through OpenRouter. Please use fictional details, not personal information. "
-    "Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
+    "Optional /voice mode sends recordings and reply text to Gnani for speech processing after you enable it. Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
     "/talk: conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
     "· /privacy: data details. Free hosting may take a moment to wake up."
 )
@@ -124,11 +124,14 @@ SCENARIOS = {
 
 
 class PublicDemo:
-    def __init__(self, store, settings, model):
+    def __init__(self, store, settings, model, voice=None):
         self.store, self.settings, self.model = store, settings, model
+        self.voice = voice
 
     @staticmethod
     def _clear(db, chat):
+        db.execute("DELETE FROM voice_jobs WHERE chat=?", (chat,))
+        db.execute("DELETE FROM voice_preferences WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_intakes WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_turns WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_sessions WHERE chat=?", (chat,))
@@ -223,7 +226,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Your demo is separate from other visitors and the owner's wedding. The service operator can access stored demo data. AI questions send your text, fictional scenario and recent replies to OpenRouter; never send secrets or personal wedding data. Stored demo data expires after 7 days of inactivity while the service runs. /delete clears it now; provider records, hosting backups and Telegram messages have separate retention. No real calls, bookings, payments or background monitoring run in this demo.",
+                    "Your demo is separate from other visitors and the owner's wedding. The service operator can access stored demo data. AI questions send your text, fictional scenario and recent replies to OpenRouter; never send secrets or personal wedding data. Optional /voice uses Gnani for recordings and generated speech; audio is processed transiently, while transcripts follow demo retention. Stored demo data expires after 7 days of inactivity while the service runs. /delete clears it now; provider records, hosting backups and Telegram messages have separate retention. No real calls, bookings, payments or background monitoring run in this demo.",
                 )
                 return True
             if command == "/live":
@@ -256,6 +259,10 @@ class PublicDemo:
                 Store.message(db, key, cid, WELCOME, MENU)
                 return True
             db.execute("UPDATE demo_sessions SET updated=? WHERE chat=?", (now, cid))
+            if self.voice and self.voice.handle(
+                db, key, cid, session, message, data, command, self._quota
+            ):
+                return True
             if command in ("/demo", "/help", "/status"):
                 Store.message(
                     db,
@@ -271,6 +278,7 @@ class PublicDemo:
                 )
                 return True
             if data == "demo:talk" or command == "/talk":
+                db.execute("DELETE FROM voice_jobs WHERE chat=?", (cid,))
                 generation = uuid.uuid4().hex
                 db.execute("DELETE FROM demo_turns WHERE chat=?", (cid,))
                 db.execute(
@@ -292,7 +300,7 @@ class PublicDemo:
                     and number.isdigit()
                     and 1 <= int(number) <= len(Intake.choices(state))
                 ):
-                    data = f"demo:pick:{state['revision']}:{int(number)-1}"
+                    data = f"demo:pick:{state['revision']}:{int(number) - 1}"
                 else:
                     Intake.render(
                         db,
@@ -325,6 +333,12 @@ class PublicDemo:
                     )
                 return True
             if data in ("demo:decor", "demo:courier"):
+                db.execute("DELETE FROM voice_jobs WHERE chat=?", (cid,))
+                db.execute("DELETE FROM voice_preferences WHERE chat=?", (cid,))
+                db.execute(
+                    "UPDATE outbox SET state='cancelled' WHERE chat=? AND key LIKE 'demo:speech:%' AND state='pending'",
+                    (cid,),
+                )
                 db.execute("DELETE FROM demo_intakes WHERE chat=?", (cid,))
                 scenario = data.split(":")[1]
                 generation = uuid.uuid4().hex
@@ -385,7 +399,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Send a text question up to 2,000 characters, or use /demo, /reset, /privacy or /delete. Voice notes and files are not processed.",
+                    "Send a text question up to 2,000 characters, or use /demo, /reset, /privacy or /delete. For voice notes, start /talk then enable /voice. Other files are not processed.",
                 )
                 return True
             pending = db.execute(
