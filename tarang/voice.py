@@ -10,7 +10,7 @@ from .store import Store
 MAX_AUDIO = 10 * 1024 * 1024
 NOTICE = (
     "Voice mode uses Gnani to transcribe recordings and generate an AI voice. "
-    "Confirmed text and recent demo context go to OpenRouter. Use fictional details only. "
+    "Confirmed text and recent conversation context go to OpenRouter. Use made-up names and details, not real wedding information or secrets. "
     "Send a voice note up to 60 seconds (ideally 30); I'll show what I heard before using it. "
     "Replies include text and suggested buttons. /voice off returns to text. "
     "Use /voice en-IN or /voice hi-IN to select the spoken language."
@@ -119,7 +119,7 @@ class VoiceDemo:
                     db,
                     key,
                     chat,
-                    "Choose Start with voice or send /voice to start a fictional voice conversation.",
+                    "Choose Start with voice or send /voice to start a voice conversation.",
                 )
             elif arg and arg not in {"en-in", "hi-in"}:
                 Store.message(
