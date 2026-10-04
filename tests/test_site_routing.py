@@ -42,3 +42,19 @@ def test_vercel_output_contract(tmp_path, fault):
     )
     assert result.returncode == (1 if fault else 0), result.stdout + result.stderr
     assert config["buildCommand"] == "node scripts/check_site.mjs"
+
+
+def test_docs_project_builds_from_its_own_root(tmp_path):
+    shutil.copytree(ROOT / "docs", tmp_path / "docs")
+    shutil.copytree(ROOT / "scripts", tmp_path / "scripts")
+    config = json.loads((tmp_path / "docs/vercel.json").read_text())
+    result = subprocess.run(
+        config["buildCommand"].split(),
+        cwd=tmp_path / "docs",
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    main = json.loads((ROOT / "vercel.json").read_text())
+    assert config["rewrites"] == main["rewrites"]
+    assert config["headers"] == main["headers"]

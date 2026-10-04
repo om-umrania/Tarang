@@ -1,6 +1,6 @@
 // Fail the static website build before publishing an output without its entry pages.
 import { readFileSync, statSync } from 'node:fs';
-import { resolve, relative, isAbsolute, sep } from 'node:path';
+import { resolve, relative, isAbsolute, sep, basename } from 'node:path';
 
 function fail(message) {
   throw new Error(`Website routing check failed: ${message}`);
@@ -8,7 +8,8 @@ function fail(message) {
 try {
   const root = process.cwd();
   const config = JSON.parse(readFileSync(resolve(root, 'vercel.json'), 'utf8'));
-  if (config.outputDirectory !== 'docs') fail('outputDirectory must be docs; the repository root has no homepage.');
+  const expectedOutput = basename(root) === 'docs' ? '.' : 'docs';
+  if (config.outputDirectory !== expectedOutput) fail('outputDirectory must be docs; the repository root has no homepage.');
   const output = resolve(root, config.outputDirectory);
   function requireFile(name) {
     const file = resolve(output, name);
