@@ -112,6 +112,12 @@ Open the scenario menu with `/help`, then select **Try décor rescue**. This is 
 
 ## C. Existing guided hamper recovery
 
+For the complete Anand Gifts scenario after the Jaipur décor case, use the
+[Scenario 2 conversation and reply document](SCENARIO_2_COURIER_CONVERSATION.md).
+It includes the monitor trigger, category-authority branches, payment states,
+venue verification and final couple update. The shorter guided path below is
+not evidence that those integrations have run.
+
 Open `/help` and choose **Try hamper delivery**.
 
 | Action | Expected checkpoint |
