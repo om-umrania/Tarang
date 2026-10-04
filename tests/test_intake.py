@@ -107,7 +107,7 @@ def test_free_text_multiple_facts_skip_questions_and_correction_survives_restart
     )
     demo.ingest(update(3, text="Fictional full problem and requirements"))
     asyncio.run(demo.step())
-    assert facts(demo)["phase"] == "review"
+    assert facts(demo)["phase"] == "conversation"
     assert facts(demo)["facts"]["deadline"].endswith("4 pm IST")
     assert payload(demo)["text"] == "I've noted your requirements."
     assert "reply_markup" not in payload(demo)
@@ -127,6 +127,36 @@ def test_free_text_multiple_facts_skip_questions_and_correction_survives_restart
         demo.model.contexts[-1]["history"][0]["body"]
         == "Fictional full problem and requirements"
     )
+
+
+def test_partial_conversation_and_closure_do_not_resume_intake(demo):
+    start(demo)
+    old_choice = payload(demo)["reply_markup"]["inline_keyboard"][0][0]["callback_data"]
+    replies = [
+        ("The courier failed; all 200 hampers are packed.",
+         "I'd confirm replacement pickup availability and the arrival deadline.",
+         IntakeFacts(problem="200 hampers need replacement pickup", contact="Anand Gifts")),
+        ("Carrier says delivered; venue count is unconfirmed.",
+         "The venue coordinator needs to confirm all 200 arrived intact before closure.",
+         IntakeFacts(verifier="Venue coordinator")),
+        ("All 200 arrived intact on time; Rs 1,200 payment reconciled.",
+         "The supplied records support closing the delivery and payment checks.",
+         IntakeFacts(constraints="200 intact on time; Rs 1,200 payment reconciled")),
+    ]
+    for uid, (question, answer, updates) in enumerate(replies, 3):
+        demo.model.result = IntakeReply(message=answer, facts=updates)
+        demo.ingest(update(uid, text=question))
+        assert asyncio.run(demo.step())
+        assert payload(demo)["text"] == answer
+        assert "reply_markup" not in payload(demo)
+        assert facts(demo)["facts"]["priority"] == ""
+        assert facts(demo)["phase"] == "conversation"
+    # Natural replies do not confer actual payment/booking authority.
+    for table in ("operations", "budgets", "commitments", "evidence"):
+        assert not rows(demo, table)
+    demo.ingest(update(10, callback=old_choice))
+    assert "no longer current" in payload(demo)["text"]
+    assert facts(demo)["facts"]["contact"] == "Anand Gifts"
 
 
 def test_stale_cross_user_duplicate_and_pending_choices_cannot_change_facts(demo):
@@ -218,7 +248,8 @@ def test_typed_answer_invitation_does_not_advance_and_unknowns_not_guessed(demo)
     demo.ingest(update(4, text="Choosing music; deadline not decided"))
     asyncio.run(demo.step())
     assert facts(demo)["facts"]["deadline"] == "Not decided"
-    assert "Who should I coordinate" in payload(demo)["text"]
+    assert payload(demo)["text"] == "We'll keep the deadline unconfirmed."
+    assert "reply_markup" not in payload(demo)
 
 
 def test_expired_model_request_preserves_facts_without_stale_summary(demo):
@@ -291,11 +322,11 @@ def test_keyboard_selections_use_same_flow_and_respect_pending_answer(demo):
     demo.ingest(update(6, 42, "/choose 1"))
     assert facts(demo, 42)["facts"]["deadline"] == ""
     asyncio.run(demo.step())
-    for uid in range(7, 13):
-        demo.ingest(update(uid, 42, "/choose 1"))
-    assert facts(demo, 42)["phase"] == "review"
-    demo.ingest(update(13, 42, "/choose 1"))
-    assert facts(demo, 42)["phase"] == "investigated"
-    demo.ingest(update(14, 42, "/choose 1"))
-    assert facts(demo, 42)["phase"] == "feedback"
+    assert facts(demo, 42)["phase"] == "conversation"
+    demo.ingest(update(7, 42, "/choose 1"))
+    assert "correction" in payload(demo)["text"]
+    demo.ingest(update(8, 42, "/choose 2"))
+    assert facts(demo, 42)["phase"] == "paused"
+    demo.ingest(update(9, 42, "/choose 1"))
+    assert facts(demo, 42)["phase"] == "conversation"
     assert not rows(demo, "operations")

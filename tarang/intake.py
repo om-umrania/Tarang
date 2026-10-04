@@ -99,6 +99,8 @@ class Intake:
 
     @staticmethod
     def choices(state):
+        if state["phase"] == "conversation":
+            return ["Change a detail", "Pause"]
         if state["phase"] == "review":
             return ["Review contact status", "Change a detail", "Pause"]
         if state["phase"] == "investigated":
@@ -137,6 +139,8 @@ class Intake:
             return
         if state["phase"] == "collect":
             text = QUESTIONS[missing][0]
+        elif state["phase"] == "conversation":
+            text = "You can send the next update or ask about the remaining checks."
         elif state["phase"] == "review":
             text = (
                 "The next step is to confirm the contact's status and recovery options. "
@@ -218,8 +222,8 @@ class Intake:
             if value:
                 state["facts"][field] = value
         if state["phase"] != "paused":
-            state["phase"] = (
-                "collect"  # corrected plan must be reviewed before another rehearsal
-            )
+            state["phase"] = "conversation"
         cls.save(db, chat, state)
-        cls.render(db, key, chat, state, result.message)
+        # A free-text answer is a conversation, not a request to resume the
+        # guided questionnaire. Missing optional fields must not append a menu.
+        Store.message(db, key, chat, result.message)

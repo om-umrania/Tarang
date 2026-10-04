@@ -1,7 +1,7 @@
 'use strict';
 (() => {
   const $ = id => document.getElementById(id);
-  const labels = {open:'Open',closed:'Closed',collect:'Gathering details',review:'Plan review',intake:'Planning',investigated:'Options review',feedback:'Preference recorded',paused:'Paused',pending:'Queued',processing:'Processing',done:'Processed',received:'Received',sent:'Sent to Telegram',sending:'Sending',unknown:'Delivery uncertain',failed:'Failed',cancelled:'Cancelled',held:'Held',approval:'Needs approval',operator_pending:'Awaiting operator',succeeded:'Recorded success',rejected:'Rejected',expired:'Expired'};
+  const labels = {open:'Open',closed:'Closed',collect:'Gathering details',conversation:'Conversation · outcome unverified',review:'Plan review',intake:'Planning',investigated:'Options review',feedback:'Preference recorded',paused:'Paused',pending:'Queued',processing:'Processing',done:'Processed',received:'Received',sent:'Sent to Telegram',sending:'Sending',unknown:'Delivery uncertain',failed:'Failed',cancelled:'Cancelled',held:'Held',approval:'Needs approval',operator_pending:'Awaiting operator',succeeded:'Recorded success',rejected:'Rejected',expired:'Expired'};
   const human = s => labels[s] || String(s || 'Not recorded').replaceAll('_',' ');
   const date = seconds => seconds ? new Date(seconds * 1000).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}) + ' IST' : 'Time not recorded';
   const money = paise => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:2}).format(paise / 100);
