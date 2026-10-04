@@ -170,9 +170,13 @@ class PublicDemo:
             pass
         return 10
 
-    def _quota(self, db, chat, kind, now, per_user, global_limit):
+    def _session_quota(self, db, chat, kind, now, per_user, global_limit):
         if kind == "model":
             per_user = self._model_limit(chat, now)
+        return self._quota(db, chat, kind, now, per_user, global_limit)
+
+    @staticmethod
+    def _quota(db, chat, kind, now, per_user, global_limit):
         day = datetime.fromtimestamp(now, ZoneInfo("Asia/Kolkata")).date().isoformat()
         for target, limit in ((chat, per_user), (0, global_limit)):
             r = db.execute(
@@ -245,7 +249,7 @@ class PublicDemo:
             if db.execute("SELECT 1 FROM demo_seen WHERE key=?", (key,)).fetchone():
                 return True
             db.execute("INSERT INTO demo_seen(key,created) VALUES(?,?)", (key, now))
-            allowed = self._quota(db, cid, "input", now, 100, 2000)
+            allowed = self._session_quota(db, cid, "input", now, 100, 2000)
             if command == "/delete":
                 self._clear(db, cid)
                 if allowed:
@@ -351,7 +355,7 @@ class PublicDemo:
                     {},
                     "",
                     command if command else "/voice",
-                    self._quota,
+                    self._session_quota,
                 )
                 if session["scenario"] == "conversation":
                     Intake.render(
@@ -363,7 +367,7 @@ class PublicDemo:
                     )
                 return True
             if self.voice and self.voice.handle(
-                db, key, cid, session, message, data, command, self._quota
+                db, key, cid, session, message, data, command, self._session_quota
             ):
                 return True
             if command in ("/demo", "/help", "/status"):
@@ -517,7 +521,7 @@ class PublicDemo:
                     "I'm still working on your previous question. Please wait for that reply.",
                 )
                 return True
-            if not self._quota(db, cid, "model", now, 10, 100):
+            if not self._session_quota(db, cid, "model", now, 10, 100):
                 Store.message(
                     db,
                     key,
