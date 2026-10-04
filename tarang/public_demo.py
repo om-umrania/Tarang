@@ -156,8 +156,23 @@ class PublicDemo:
         # Only this chat's demo output. Never alter the private wedding workspace.
         db.execute("DELETE FROM outbox WHERE chat=? AND key LIKE 'demo:%'", (chat,))
 
-    @staticmethod
-    def _quota(db, chat, kind, now, per_user, global_limit):
+    def _model_limit(self, chat, now):
+        if chat not in self.settings.allowed:
+            return 10
+        try:
+            allowance = json.loads(self.settings.operator_model_allowance)
+            day = datetime.fromtimestamp(now, ZoneInfo("Asia/Kolkata")).date().isoformat()
+            if isinstance(allowance, dict) and allowance.get("date") == day:
+                extra = allowance.get("extra_turns")
+                if type(extra) is int and 0 <= extra <= 40:
+                    return 10 + extra
+        except (ValueError, TypeError):
+            pass
+        return 10
+
+    def _quota(self, db, chat, kind, now, per_user, global_limit):
+        if kind == "model":
+            per_user = self._model_limit(chat, now)
         day = datetime.fromtimestamp(now, ZoneInfo("Asia/Kolkata")).date().isoformat()
         for target, limit in ((chat, per_user), (0, global_limit)):
             r = db.execute(
@@ -507,8 +522,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "The free AI demo limit has been reached for today. The guided scenario buttons still work. Limits reset at midnight IST.",
-                    MENU,
+                    "Today's AI message limit has been reached. It resets at midnight IST; this update hasn't changed any approval.",
                 )
                 return True
             if session["scenario"] == "conversation":

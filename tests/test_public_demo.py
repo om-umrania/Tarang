@@ -168,6 +168,54 @@ def test_model_budget_survives_reset_and_global_limit(demo):
     assert not asyncio.run(demo.step())
 
 
+def test_operator_allowance_preserves_counters_and_global_cap(demo):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    day = datetime.now(ZoneInfo("Asia/Kolkata")).date().isoformat()
+    demo.settings.operator_model_allowance = json.dumps({"date": day, "extra_turns": 20})
+    start(demo, chat=42)
+    for n in range(10):
+        demo.ingest(update(3 + n, 42, "Question"))
+        asyncio.run(demo.step())
+    demo.ingest(update(20, 42, "/reset"))
+    demo.ingest(update(21, 42, callback="demo:decor"))
+    demo.ingest(update(22, 42, "Continue"))
+    assert asyncio.run(demo.step())
+    assert len(demo.model.contexts) == 11
+    with demo.store.tx() as db:
+        count = db.execute("SELECT count FROM demo_usage WHERE chat=42 AND kind='model'").fetchone()["count"]
+        assert count == 11
+        db.execute("UPDATE demo_usage SET count=30 WHERE chat=42 AND kind='model'")
+    demo.ingest(update(23, 42, "At operator cap"))
+    assert not asyncio.run(demo.step())
+    payload = json.loads(rows(demo, "outbox")[-1]["payload"])
+    assert "demo" not in payload["text"].lower()
+    assert not payload.get("reply_markup")
+    with demo.store.tx() as db:
+        db.execute("UPDATE demo_usage SET count=11 WHERE chat=42 AND kind='model'")
+        db.execute("UPDATE demo_usage SET count=100 WHERE chat=0 AND kind='model'")
+    demo.ingest(update(24, 42, "At global cap"))
+    assert not asyncio.run(demo.step())
+    assert demo._model_limit(101, time.time()) == 10
+
+
+@pytest.mark.parametrize("value", ["", "bad", "[]", "null",
+    '{"date":"2026-10-03","extra_turns":20}',
+    '{"date":"2026-10-04","extra_turns":41}',
+    '{"date":"2026-10-04","extra_turns":true}'])
+def test_invalid_or_expired_operator_allowance(demo, value):
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    now = datetime(2026, 10, 4, 23, 59, tzinfo=ZoneInfo("Asia/Kolkata")).timestamp()
+    demo.settings.operator_model_allowance = value
+    assert demo._model_limit(42, now) == 10
+    demo.settings.operator_model_allowance = '{"date":"2026-10-04","extra_turns":20}'
+    assert demo._model_limit(42, now) == 30
+    assert demo._model_limit(42, now + 120) == 10
+
+
 def test_one_pending_question_and_restart_preserves_history(demo):
     start(demo)
     demo.ingest(update(3, text="first"))
