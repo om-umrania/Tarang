@@ -107,7 +107,7 @@ def test_free_text_multiple_facts_skip_questions_and_correction_survives_restart
     )
     demo.ingest(update(3, text="Fictional full problem and requirements"))
     asyncio.run(demo.step())
-    assert facts(demo)["phase"] == "review"
+    assert facts(demo)["phase"] == "conversation"
     assert facts(demo)["facts"]["deadline"].endswith("4 pm IST")
     assert payload(demo)["text"] == "I've noted your requirements."
     assert "reply_markup" not in payload(demo)
@@ -150,6 +150,7 @@ def test_partial_conversation_and_closure_do_not_resume_intake(demo):
         assert payload(demo)["text"] == answer
         assert "reply_markup" not in payload(demo)
         assert facts(demo)["facts"]["priority"] == ""
+        assert facts(demo)["phase"] == "conversation"
     # Natural replies do not confer actual payment/booking authority.
     for table in ("operations", "budgets", "commitments", "evidence"):
         assert not rows(demo, table)
@@ -321,11 +322,11 @@ def test_keyboard_selections_use_same_flow_and_respect_pending_answer(demo):
     demo.ingest(update(6, 42, "/choose 1"))
     assert facts(demo, 42)["facts"]["deadline"] == ""
     asyncio.run(demo.step())
-    for uid in range(7, 13):
-        demo.ingest(update(uid, 42, "/choose 1"))
-    assert facts(demo, 42)["phase"] == "review"
-    demo.ingest(update(13, 42, "/choose 1"))
-    assert facts(demo, 42)["phase"] == "investigated"
-    demo.ingest(update(14, 42, "/choose 1"))
-    assert facts(demo, 42)["phase"] == "feedback"
+    assert facts(demo, 42)["phase"] == "conversation"
+    demo.ingest(update(7, 42, "/choose 1"))
+    assert "correction" in payload(demo)["text"]
+    demo.ingest(update(8, 42, "/choose 2"))
+    assert facts(demo, 42)["phase"] == "paused"
+    demo.ingest(update(9, 42, "/choose 1"))
+    assert facts(demo, 42)["phase"] == "conversation"
     assert not rows(demo, "operations")

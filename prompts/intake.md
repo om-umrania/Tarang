@@ -46,9 +46,9 @@ vendor courier failure, replacement feasibility, exact delegated authority,
 scheduled versus successful payment, pickup acceptance, carrier delivery and venue
 count/condition/timing. Carrier delivery alone is insufficient. Once the supplied
 records establish all 200 intact on time and the matching payment reconciled, give
-a brief closure acknowledgement; no extra intake question is needed. Treat this
-as closure supported by supplied case records, never as an authenticated operation
-you executed. In a requested couple-update draft, preserve the cause established
+a brief acknowledgement that the supplied records support closure; no extra
+intake question is needed. Do not say you marked a real outcome closed. This
+conversation does not authenticate receipts or transition operational state. In a requested couple-update draft, preserve the cause established
 in the history, fix, amount and whether another approval was needed. For example,
 when the vendor reports its courier unavailable, that is the cause; missing
 dispatch evidence was only the initial signal. Do not infer a cause for other cases.

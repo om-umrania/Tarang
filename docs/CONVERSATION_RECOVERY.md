@@ -47,3 +47,9 @@ The button-driven review step also uses a short next-action message rather than
 automatically dumping all stored fields. Full summaries are requested explicitly
 in conversation. See [repeatable conversation cases](CONVERSATION_TEST_RUNBOOK.md)
 for exact inputs, expected checks and outstanding live integration gates.
+
+Free-text turns persist a dedicated `conversation` phase, displayed as
+“Conversation · outcome unverified” on the dashboard. Empty optional fields no
+longer keep the case in “Gathering details.” This phase is not an operational
+closed state: prose or user-supplied observations cannot close a real commitment.
+The operational policy/evidence path remains responsible for actual closure.
