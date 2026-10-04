@@ -86,3 +86,16 @@ After release, verify `/` and `/dashboard`, confirm unauthenticated API access i
 rejected, connect privately with the operator token, and check an authorised
 Telegram message and reply appear in the selected conversation. Verify cache headers
 and refresh across both Vercel and Render. Never paste tokens into URLs or reports.
+
+### Production 404 diagnosis and build guard
+
+The production deployment of `main` at `7732d48` served `/docs/index.html` with
+HTTP 200 but returned HTTP 404 at `/`. Its build completed successfully and the
+Vercel runtime-error query returned no errors. The site content existed; the
+published root lacked the homepage. PR #2 selects `docs` as the output directory;
+its GitHub-built preview served `/` and `/dashboard` with HTTP 200.
+
+The Vercel build now runs `node scripts/check_site.mjs`, which fails on an incorrect
+output directory, missing entry page or asset, or broken dashboard/API route.
+Regression fixtures reproduce the missing-root and missing-asset failures. These
+checks validate build contents; they do not claim the Render API revision is live.
