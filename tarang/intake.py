@@ -222,4 +222,9 @@ class Intake:
                 "collect"  # corrected plan must be reviewed before another rehearsal
             )
         cls.save(db, chat, state)
-        cls.render(db, key, chat, state, result.message)
+        # A free-text answer is a conversation, not a request to resume the
+        # guided questionnaire. Missing optional fields must not append a menu.
+        if state["phase"] == "collect" and all(state["facts"].values()):
+            state["phase"] = "review"
+            cls.save(db, chat, state)
+        Store.message(db, key, chat, result.message)
