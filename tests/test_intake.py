@@ -74,14 +74,14 @@ def test_question_suggestions_complete_action_feedback_and_pause(demo):
     ):
         choose(demo, uid, label)
     assert "Here's the plan" in payload(demo)["text"]
-    choose(demo, 10, "Rehearse the contact check")
-    assert "Simulated contact response" in payload(demo)["text"]
+    choose(demo, 10, "Review contact status")
+    assert "Contact status" in payload(demo)["text"]
     choose(demo, 11, "Explore alternatives")
     assert facts(demo)["feedback"] == "Explore alternatives"
     assert "Nothing is booked" in payload(demo)["text"]
-    choose(demo, 12, "Pause rehearsal")
+    choose(demo, 12, "Pause")
     assert facts(demo)["phase"] == "paused"
-    choose(demo, 13, "Resume rehearsal")
+    choose(demo, 13, "Resume")
     assert facts(demo)["phase"] == "feedback"
     assert not demo.model.contexts
     for table in ("commitments", "operations", "budgets", "events", "evidence"):

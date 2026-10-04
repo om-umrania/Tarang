@@ -67,6 +67,27 @@ def button(demo):
     ][0][0]["callback_data"]
 
 
+def test_explanation_receives_reached_approvals_without_future_events(demo):
+    start(demo)
+    next_button = button(demo)
+    demo.ingest(update(3, text="What has happened?"))
+    assert asyncio.run(demo.step())
+    initial = demo.model.contexts[-1]["reached_guided_steps"]
+    assert len(initial) == 1
+    assert "approval recorded" not in " ".join(initial)
+    for uid in range(4, 9):
+        demo.ingest(update(uid, callback=next_button))
+        next_button = button(demo)
+    demo.ingest(update(9, text="Is approval still pending?"))
+    assert asyncio.run(demo.step())
+    reached = demo.model.contexts[-1]["reached_guided_steps"]
+    assert len(reached) == 6
+    assert "₹2,000" in reached[2]
+    assert "Approval recorded for ₹2,000" in reached[3]
+    assert "entrance lights don't work" in reached[4]
+    assert "payment remains unverified" in reached[5]
+
+
 def test_visitors_are_isolated_from_private_wedding_and_each_other(demo):
     with demo.store.tx() as db:
         db.execute(
@@ -111,7 +132,7 @@ def test_both_guided_journeys_never_create_real_operations(demo):
             action = button(demo)
             assert len(action.encode()) <= 64
             demo.ingest(update(uid + 2 + i, callback=action))
-        assert "Simulated" in rows(demo, "outbox")[-1]["payload"]
+        assert "payment" in rows(demo, "outbox")[-1]["payload"].lower()
     for table in ("commitments", "operations", "budgets", "events", "evidence"):
         assert not rows(demo, table)
 

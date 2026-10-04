@@ -25,15 +25,16 @@ MENU = [
     [{"text": "Try hamper delivery", "callback_data": "demo:courier"}],
 ]
 WELCOME = (
-    "Hi, I'm Tarang, your AI wedding coordinator. Welcome to your private demo.\n\n"
-    "Choose Start with voice to talk to me and hear my replies. You can also use text and suggested answers, or try a fictional wedding problem below. Calls, vendor responses, approvals and "
-    "payments here are simulated; this demo cannot access any real wedding or WhatsApp group.\n\n"
-    "Choosing a conversation or scenario enables AI processing: your demo text and recent replies are "
-    "processed through OpenRouter. Please use fictional details, not personal information. "
-    "Choosing Start with voice or /voice enables Gnani processing of your recordings and reply text. I show the transcript for you to check before continuing. Other visitors cannot see your conversation; the service operator can access stored data.\n\n"
-    "/voice: voice conversation · /talk: text conversation · /demo: scenario menu · /reset: clear and restart · /delete: delete stored demo chat "
-    "· /privacy: data details. Free hosting may take a moment to wake up."
+    "Hi, I'm Tarang, your AI wedding coordinator. What needs attention today?\n\n"
+    "Start a conversation or choose a wedding problem below. I can help you work "
+    "through decisions; vendor calling, booking and payment connections are not enabled here.\n\n"
+    "Your messages and recent replies are processed through OpenRouter. Please avoid "
+    "personal information or secrets. Optional voice uses Gnani to process recordings "
+    "and reply text; transcripts are shown for review. Your conversation is private "
+    "from other visitors; the service operator can access stored data.\n\n"
+    "/talk: start a conversation · /privacy: data details · /delete: delete stored chat"
 )
+
 SCENARIOS = {
     "decor": {
         "facts": "Fictional decor setup due 4 pm IST; guests 5 pm; vendor now says 7 pm. "
@@ -45,37 +46,36 @@ SCENARIOS = {
                 "The décor vendor now expects to finish at 7 pm, but setup is due at 4 pm. "
                 "I'd confirm what caused the delay and whether extra crew can recover the "
                 "original deadline without changing the design. You shouldn't have to chase them.",
-                "Hear the simulated vendor response",
+                "View vendor update",
             ),
             (
-                "Simulated vendor response: extra crew and transport can restore 4 pm readiness "
+                "Vendor update: extra crew and transport can restore 4 pm readiness "
                 "for ₹2,500 inclusive. I'd ask for ₹1,500 while preserving scope and timing. "
                 "The ₹2,500 ceiling doesn't authorise me to agree.",
-                "See the simulated counteroffer",
+                "Review counteroffer",
             ),
             (
-                "Simulated counteroffer: ₹2,000 inclusive of crew, transport and taxes; "
+                "Counteroffer: ₹2,000 inclusive of crew, transport and taxes; "
                 "same décor scope, ready by 4 pm. I'd recommend this recovery if those terms "
                 "are confirmed, and ask the authorised approver before agreeing.",
-                "Approve ₹2,000 — simulation only",
+                "Approve ₹2,000",
             ),
             (
-                "Demo approval recorded. In a connected workflow I'd confirm these exact "
+                "Approval recorded for ₹2,000. I'd confirm these exact "
                 "terms and track crew arrival and setup. Approval is not payment or proof "
                 "the décor is ready. I'd ask the designated venue coordinator to inspect it.",
-                "Inspect the fictional setup",
+                "Review setup inspection",
             ),
             (
-                "Simulated inspection: the mandap is set up, but the entrance lights don't work. "
+                "Inspection update: the mandap is set up, but the entrance lights don't work. "
                 "The outcome stays open. I'd ask the vendor to fix the defect and obtain "
                 "another on-site check, without asking the bride to chase the electrician.",
-                "See the final simulated inspection",
+                "Review final inspection",
             ),
             (
-                "Simulated final inspection at 4:25 pm: lights work and the agreed setup is "
-                "ready. That's 25 minutes late, before 5 pm guest arrival. In this example, "
-                "physical readiness is verified; payment remains unverified. No real vendor "
-                "was contacted and no money moved. You can ask me about the decisions here.",
+                "Final inspection at 4:25 pm: lights work and the agreed setup is "
+                "ready. That's 25 minutes late, before 5 pm guest arrival. "
+                "Physical readiness is verified; payment remains unverified. You can ask me about the decisions here.",
                 None,
             ),
         ],
@@ -90,33 +90,32 @@ SCENARIOS = {
                 "The dispatch checkpoint passed without evidence for 200 hampers due by "
                 "6 pm. Missing evidence isn't proof of failure. I'd check with the gift "
                 "vendor and establish the actual pickup status.",
-                "Hear the simulated vendor response",
+                "View vendor update",
             ),
             (
-                "Simulated vendor response: the original courier is unavailable; all "
+                "Vendor update: the original courier is unavailable; all "
                 "hampers are packed. Suppose an approved replacement can meet the deadline "
                 "for ₹1,200, with package capacity and pickup readiness verified. I'd check "
                 "exact scope, payee and remaining budget before arranging it.",
-                "Check the fictional authority",
+                "Review spending authority",
             ),
             (
-                "This fixture grants the exact ₹1,200 courier expense within the approved "
-                "budget. In a connected workflow, that permits recovery without another "
-                "approval. Here nothing is booked or paid. I'd continue tracking pickup "
+                "The exact ₹1,200 courier expense is within the approved "
+                "budget and delegated scope. That permits recovery without another "
+                "approval. I'd continue tracking pickup "
                 "and receipt; a booking alone does not fulfil the outcome.",
-                "Inspect the fictional delivery",
+                "Review delivery inspection",
             ),
             (
-                "The simulated carrier says delivered, but the venue counts only 180 of "
+                "The carrier reports delivery, but the venue counts only 180 of "
                 "200 hampers. I'd keep the shortfall open, reconcile package references "
                 "with the carrier and ask the venue to confirm the remaining 20.",
-                "See the final simulated receipt",
+                "Review final receipt",
             ),
             (
-                "Simulated venue confirmation: the remaining 20 arrived; all 200 are "
+                "Venue confirmation: the remaining 20 arrived; all 200 are "
                 "undamaged. That would support physical fulfilment. Payment needs its "
-                "own receipt. This was a fictional walkthrough, with no shipment or "
-                "payment created. Ask me about any decision in the example.",
+                "own receipt. Ask me about any decision here.",
                 None,
             ),
         ],
@@ -222,7 +221,7 @@ class PublicDemo:
                         db,
                         key,
                         cid,
-                        "Stored demo conversation deleted. Messages already delivered in Telegram and provider records are separate. Minimal anti-abuse counts remain for up to 8 days while the service runs. Send /start to begin again.",
+                        "Stored conversation deleted. Messages already delivered in Telegram and provider records are separate. Minimal anti-abuse counts remain for up to 8 days while the service runs. Send /start to begin again.",
                     )
                 return True
             if not allowed:
@@ -240,7 +239,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "This link provides a private demo only. It does not grant access to the owner's wedding.",
+                    "This link provides an isolated conversation only. It does not grant access to the owner's wedding.",
                 )
                 return True
             if command in (
@@ -269,7 +268,7 @@ class PublicDemo:
                         db,
                         key,
                         cid,
-                        "The free demo is at capacity. Please try again later.",
+                        "The service is at capacity. Please try again later.",
                     )
                     return True
                 db.execute(
@@ -401,7 +400,7 @@ class PublicDemo:
                         db,
                         key,
                         cid,
-                        "That conversation choice is no longer current. Use /demo.",
+                        "That conversation choice is no longer current. Use /help.",
                     )
                 return True
             if data in ("demo:decor", "demo:courier"):
@@ -436,7 +435,7 @@ class PublicDemo:
                         db,
                         key,
                         cid,
-                        "That demo step is no longer current. Use the latest buttons or /demo.",
+                        "That step is no longer current. Use the latest buttons or /help.",
                     )
                     return True
                 stage = int(session["stage"]) + 1
@@ -454,7 +453,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "This is a demo. Real approval buttons cannot be used here. Choose /demo.",
+                    "This conversation cannot execute payments or bookings. Use the conversation menu.",
                 )
                 return True
             if not session["consent"]:
@@ -471,7 +470,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "Send a text question up to 2,000 characters, or use /demo, /reset, /privacy or /delete. For voice notes, start /talk then enable /voice. Other files are not processed.",
+                    "Send a text question up to 2,000 characters, or use /help, /reset, /privacy or /delete. For voice notes, start /talk then enable /voice. Other files are not processed.",
                 )
                 return True
             pending = db.execute(
@@ -483,7 +482,7 @@ class PublicDemo:
                     db,
                     key,
                     cid,
-                    "I'm still working on your previous demo question. Please wait for that reply.",
+                    "I'm still working on your previous question. Please wait for that reply.",
                 )
                 return True
             if not self._quota(db, cid, "model", now, 10, 100):
@@ -610,6 +609,13 @@ class PublicDemo:
                 context["current_field"] = next(
                     (k for k in QUESTIONS if not intake["facts"][k]), None
                 )
+            else:
+                context["reached_guided_steps"] = [
+                    step[0]
+                    for step in SCENARIOS[session["scenario"]]["steps"][
+                        : int(session["stage"]) + 1
+                    ]
+                ]
             db.execute(
                 "UPDATE demo_turns SET status='processing',lease=? WHERE key=?",
                 (now + 60, turn["key"]),
