@@ -35,11 +35,11 @@ QUESTIONS = {
         ["Date/time not decided yet"],
     ),
     "contact": (
-        "Who should I coordinate with about this? A fictional name or role is enough.",
+        "Who should I coordinate with about this? A name or role is enough.",
         ["Décor vendor", "Gift vendor", "Venue coordinator", "Contact not known yet"],
     ),
     "approver": (
-        "Who should decide on changes or extra costs? This records a demo role, not spending permission.",
+        "Who should decide on changes or extra costs? Naming a decision maker does not grant spending permission.",
         ["Me", "My partner and me", "Approver not decided yet"],
     ),
     "verifier": (
@@ -105,24 +105,24 @@ class Intake:
             key,
             chat,
             state,
-            "Let's work through a fictional problem together. Choose a suggestion or type your own answer; you can correct me along the way.",
+            "Let's work through the problem together. Choose a suggestion or type your own answer; you can correct me along the way.",
         )
 
     @staticmethod
     def choices(state):
         if state["phase"] == "review":
-            return ["Rehearse the contact check", "Change a detail", "Pause rehearsal"]
+            return ["Review contact status", "Change a detail", "Pause"]
         if state["phase"] == "investigated":
             return [
                 "Explore alternatives",
                 "Keep the original requirements",
                 "Change a detail",
-                "Pause rehearsal",
+                "Pause",
             ]
         if state["phase"] == "feedback":
-            return ["Change a detail", "Pause rehearsal"]
+            return ["Change a detail", "Pause"]
         if state["phase"] == "paused":
-            return ["Resume rehearsal", "Change a detail"]
+            return ["Resume", "Change a detail"]
         field = next((k for k in QUESTIONS if not state["facts"][k]), None)
         if not field:
             return []
@@ -149,19 +149,19 @@ class Intake:
             text = "Here's the plan so far:\n" + "\n".join(
                 f"{LABELS[k]}: {v}" for k, v in state["facts"].items()
             )
-            text += "\n\nI'd first ask the contact for the current status and feasible recovery options, preserving your requirements. Then I'd bring material trade-offs to your decision maker and seek an on-site check. Shall we rehearse that next step, or change something?"
+            text += "\n\nI'd first ask the contact for the current status and feasible recovery options, preserving your requirements. Then I'd bring material trade-offs to your decision maker and seek an on-site check. Shall we review the next step, or change something?"
         elif state["phase"] == "investigated":
             text = (
-                "Simulated contact response: the original plan cannot yet be confirmed; recovery options, costs and timing still need checking. This is an authored test event, not a real vendor response.\n\n"
+                "Contact status: the original plan cannot yet be confirmed; recovery options, costs and timing still need checking.\n\n"
                 f"Your priority is: {state['facts']['priority']}. I'd investigate options that preserve: {state['facts']['constraints']}. Should I explore alternatives or keep the original requirements?"
             )
         elif state["phase"] == "feedback":
             text = (
-                f"Demo preference recorded: {state['feedback']}. I'd request feasibility, exact scope, timing and all-inclusive cost from {state['facts']['contact']}, then bring any change to {state['facts']['approver']} before agreeing. "
+                f"Preference recorded: {state['feedback']}. I'd request feasibility, exact scope, timing and all-inclusive cost from {state['facts']['contact']}, then bring any change to {state['facts']['approver']} before agreeing. "
                 f"The next observation would be that contact's response, followed by verification from {state['facts']['verifier']}. Nothing is booked, paid, scheduled or verified here. You can change any detail by typing it."
             )
         else:
-            text = "Rehearsal paused. No background actions run in this demo. You can resume or change a detail."
+            text = "Paused. No background actions are scheduled. You can resume or change a detail."
         options = cls.choices(state)
         if options:
             text += "\n\n" + " · ".join(
@@ -196,7 +196,7 @@ class Intake:
                 db,
                 key,
                 chat,
-                "That choice is no longer current. Please use the latest question or /demo.",
+                "That choice is no longer current. Please use the latest question or /help.",
             )
             return
         label = options[int(parts[3])]
@@ -205,13 +205,13 @@ class Intake:
                 db,
                 key,
                 chat,
-                "Type your answer or correction, including which detail you want to change. You can give several details at once. Please use fictional details.",
+                "Type your answer or correction, including which detail you want to change. You can give several details at once.",
             )
             return
-        if label == "Pause rehearsal":
+        if label == "Pause":
             state["resume_phase"] = state["phase"]
             state["phase"] = "paused"
-        elif label == "Resume rehearsal":
+        elif label == "Resume":
             state["phase"] = state.pop("resume_phase", "review")
         elif state["phase"] == "review":
             state["phase"] = "investigated"
