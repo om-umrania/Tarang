@@ -99,3 +99,13 @@ The Vercel build now runs `node scripts/check_site.mjs`, which fails on an incor
 output directory, missing entry page or asset, or broken dashboard/API route.
 Regression fixtures reproduce the missing-root and missing-asset failures. These
 checks validate build contents; they do not claim the Render API revision is live.
+
+### PostgreSQL verification — 4 October 2026
+
+The [Telegram-to-dashboard integration test](TELEGRAM_DASHBOARD_E2E.md) now passes
+against isolated PostgreSQL 15.12, including approval, operator evidence, pause/resume
+and persisted dashboard state after reloading the app. It exposed an integer-flag
+binding defect hidden by SQLite; the PostgreSQL adapter now converts Python booleans
+to 0/1 without a schema change. The saved artifact is explicitly synthetic. A real
+Telegram-origin conversation through the released backend and production dashboard
+remains a required gate before recording the final demo.

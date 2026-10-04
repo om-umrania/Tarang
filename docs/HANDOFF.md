@@ -160,3 +160,15 @@ https://tarang-virid.vercel.app/ (which returned 404 before these changes).
 Both the website and backend must receive the new revision before live verification.
 The page is operator-only; the operator token is entered privately, never embedded.
 See the dashboard guide for migration, limits, release and acceptance checks.
+
+### PostgreSQL dashboard rehearsal verification — 4 October 2026
+
+A delegated coding agent ran 31 focused tests against disposable PostgreSQL 15.12,
+including a complete webhook → approval → saved evidence → dashboard reload journey.
+The run exposed Python bool parameters being bound as PostgreSQL BOOLEAN against
+BIGINT flag columns. The adapter now normalises those parameters to 0/1; budget,
+evidence verification and pause/resume pass. See the
+[verification report](TELEGRAM_DASHBOARD_E2E.md) and its sanitized fixture artifact.
+This is not a live Telegram-client or hosted production verification. Record the
+final demo only after the matching backend and frontend release and a real
+Telegram-origin conversation is correlated to saved production dashboard evidence.

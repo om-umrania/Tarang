@@ -169,6 +169,12 @@ class PostgresConnection:
         self.conn = conn
 
     def execute(self, sql, parameters=()):
+        # Flags in the shared SQLite/PostgreSQL schema are integer-backed.
+        # SQLite accepts Python bool as an integer; psycopg binds it as BOOLEAN,
+        # which PostgreSQL cannot insert into our BIGINT flag columns.
+        parameters = tuple(
+            int(value) if isinstance(value, bool) else value for value in parameters
+        )
         # psycopg parses literal percent signs when parameters are supplied.
         # Escape SQL wildcards before translating our SQLite-style placeholders.
         sql = sql.replace("%", "%%").replace("?", "%s")

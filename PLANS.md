@@ -52,3 +52,10 @@ The previous persona and experience design remains the reference in docs/.
 - [x] Local API/contract checks and desktop/mobile browser verification.
 - [ ] Release through GitHub and verify the matching Render backend revision.
 - [ ] Confirm a real Telegram round trip appears on the production website.
+
+## Final demo verification gate — 4 October 2026
+
+- [x] Delegated coding agent: one complete synthetic webhook conversation through saved dashboard evidence and restart, on PostgreSQL 15.12.
+- [x] Fix PostgreSQL bool-to-integer binding for budget, evidence and pause/resume.
+- [ ] Release the matching frontend/backend through the approved GitHub workflow.
+- [ ] Correlate one real Telegram-origin conversation and reply with saved production dashboard evidence before recording the final demo.
