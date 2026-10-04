@@ -135,3 +135,11 @@ Python is confirmed. Framework, hosting/database provider, exact partner endpoin
 payment product and model remain open. Prefer the smallest durable runtime that
 meets these contracts; do not add
 LangGraph or Supabase solely because an older document recommends them.
+
+## Implemented dashboard projection — 4 October 2026
+
+The [dashboard](DASHBOARD.md) adds a read-only operator surface: Vercel static
+page → same-origin authenticated rewrite → Render `/api/dashboard` → existing
+SQLite/PostgreSQL state. It does not run the agent on Vercel. Demo input display
+history and outbox creation timestamps are additive persistence fields; runtime
+policies and operation dispatch remain owned by the existing engine.

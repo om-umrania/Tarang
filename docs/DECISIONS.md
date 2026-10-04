@@ -131,3 +131,13 @@ minimum if calling is not connected. Implemented voice-note input, reviewed
 transcripts and generated voice replies for the fictional conversation using Gnani's
 documented speech APIs. Live speech access is not configured yet; no calling or
 real vendor authority is inferred. See [Telegram voice](VOICE_TELEGRAM.md).
+
+### 4 October 2026 — live decision dashboard
+
+Om requested a dashboard showing the current end-to-end decision and Telegram
+conversation status on the existing website, and supplied
+https://tarang-virid.vercel.app/ as the target. Implement an authenticated operator
+view over the existing persisted backend; preserve private demo isolation and
+source/evidence distinctions. Release follows Om's GitHub-to-Vercel-only policy;
+no direct Vercel deployment or unrequested PR merge is authorised. See
+[dashboard](DASHBOARD.md) for implementation, migration and verification boundaries.

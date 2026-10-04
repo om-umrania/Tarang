@@ -43,3 +43,19 @@ The previous persona and experience design remains the reference in docs/.
 - [ ] Configure sandbox merchant/Payouts entitlement, funding and beneficiary.
 - [ ] Build and verify sandbox dispatch/reconciliation before considering live mode.
 - [ ] Record an actual model-led complete rail journey with real-source events.
+
+## Live dashboard — 4 October 2026
+
+- [x] Authenticated read-only projections for Telegram, decisions, approvals and evidence.
+- [x] Responsive dashboard, refresh/stale states, isolated demo history and retention.
+- [x] Source-controlled Vercel static routing and Render API rewrite.
+- [x] Local API/contract checks and desktop/mobile browser verification.
+- [ ] Release through GitHub and verify the matching Render backend revision.
+- [ ] Confirm a real Telegram round trip appears on the production website.
+
+## Final demo verification gate — 4 October 2026
+
+- [x] Delegated coding agent: one complete synthetic webhook conversation through saved dashboard evidence and restart, on PostgreSQL 15.12.
+- [x] Fix PostgreSQL bool-to-integer binding for budget, evidence and pause/resume.
+- [ ] Release the matching frontend/backend through the approved GitHub workflow.
+- [ ] Correlate one real Telegram-origin conversation and reply with saved production dashboard evidence before recording the final demo.

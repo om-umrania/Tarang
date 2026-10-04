@@ -6,8 +6,13 @@ import json
 import time
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
-from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import HTMLResponse, PlainTextResponse
+from fastapi import FastAPI, Header, HTTPException, Request, Query
+from fastapi.responses import (
+    HTMLResponse,
+    PlainTextResponse,
+    JSONResponse,
+    FileResponse,
+)
 from .config import Settings
 from .store import Store
 from .adapters import OpenRouter, Telegram
@@ -206,6 +211,37 @@ def create_app(settings=None, model=None, telegram=None, run_worker=True):
     @app.get("/", response_class=HTMLResponse)
     def console():
         return (Path(__file__).parent / "console.html").read_text()
+
+    @app.get("/dashboard", response_class=HTMLResponse)
+    def dashboard_page():
+        return FileResponse(
+            Path(__file__).parent.parent / "docs/dashboard.html",
+            headers={"Cache-Control": "no-store"},
+        )
+
+    @app.get("/dashboard.css")
+    @app.get("/dashboard.js")
+    def dashboard_asset(request: Request):
+        return FileResponse(
+            Path(__file__).parent.parent / "docs" / request.url.path.lstrip("/")
+        )
+
+    @app.get("/api/dashboard")
+    def dashboard_state(
+        authorization: str = Header(default=""),
+        scope: str | None = Query(default=None, pattern="^(workspace|demo)$"),
+        chat: int | None = Query(default=None, gt=0),
+    ):
+        authorised(authorization)
+        if (scope is None) != (chat is None):
+            raise HTTPException(422, "Supply both scope and chat")
+        from .dashboard import snapshot
+
+        body = snapshot(store, settings, scope, chat)
+        return JSONResponse(
+            body,
+            headers={"Cache-Control": "private, no-store", "Vary": "Authorization"},
+        )
 
     @app.post("/telegram/webhook")
     async def webhook(

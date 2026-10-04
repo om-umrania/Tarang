@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; style-src 'self'; script-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Tarang · Live dashboard</title>
+<link rel="stylesheet" href="dashboard.css"><script src="dashboard.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to dashboard</a>
+<div class="wrap">
+<header><a class="brand" href="./">tarang<span>WEDDING OPERATIONS</span></a><nav aria-label="Primary"><a href="./">Experience review</a><a href="https://t.me/tarang_wedding_bot" target="_blank" rel="noreferrer">Open Telegram ↗</a></nav></header>
+<main id="main">
+<section class="hero"><div><div class="eyebrow">THE COORDINATION DESK</div><h1>Every conversation.<br>Every <em>next step.</em></h1></div><div class="connection"><span class="badge" id="connection">Disconnected</span><p id="freshness" role="status" aria-live="polite">Connect to view the latest recorded state.</p><p class="subtle">Live updates every 5 seconds while this tab is visible.</p></div></section>
+<form id="connect" class="connect"><div><label for="token">Operator access token</label><input type="password" id="token" required autocomplete="off" spellcheck="false" placeholder="Enter your operator token"></div><button type="submit" id="connect-button">Connect dashboard ↗</button><p>Private operator view. Your token stays in this tab’s memory.</p></form>
+<div id="error" class="notice" role="alert" hidden></div>
+<section id="dashboard" hidden>
+<div class="toolbar"><div><span class="eyebrow">LIVE WORKSPACE</span><p id="runtime" class="subtle"></p></div><div class="actions"><button id="refresh" type="button">Refresh now</button><button id="disconnect" type="button">Disconnect</button></div></div>
+<div class="layout">
+<aside class="panel conversations"><div class="panel-head"><h2>Conversations</h2><span id="conversation-count" class="badge"></span></div><label for="search" class="sr-only">Find a conversation</label><input id="search" type="search" placeholder="Find by topic or chat ID"><label for="scope" class="sr-only">Conversation type</label><select id="scope"><option value="all">All conversations</option><option value="workspace">Wedding workspace</option><option value="demo">Fictional rehearsals</option></select><div id="conversations"></div></aside>
+<div class="detail">
+<section class="selection"><div class="eyebrow" id="mode">SELECT A CONVERSATION</div><h2 id="title">Nothing to track yet</h2><p id="context" class="subtle">Send a message in Telegram to begin.</p></section>
+<div class="metrics" id="metrics"></div>
+<div class="columns">
+<section class="panel"><div class="panel-head"><h2>Telegram conversation</h2><span class="badge">Recorded activity</span></div><p class="hint">“Sent” means accepted by Telegram, not read by the recipient.</p><div id="messages" class="messages" tabindex="0" aria-label="Telegram messages"></div><p id="history-note" class="hint"></p></section>
+<div class="status-panels"><section class="panel"><div class="panel-head"><h2>Decisions & next steps</h2></div><div id="decisions"></div></section><section class="panel"><div class="panel-head"><h2>Evidence & activity</h2></div><div id="activity"></div></section></div>
+</div>
+</div>
+</div>
+</section>
+<section id="welcome" class="welcome"><span class="ornament" aria-hidden="true">✳</span><div><h2>A clear view of what happens next.</h2><p>Follow Telegram conversations, inspect exact decisions and approvals, and see what is still waiting for evidence. Connect to load your workspace.</p></div><div class="welcome-notes"><span>01 · Conversations</span><span>02 · Decisions & approvals</span><span>03 · Outcome evidence</span></div></section>
+</main><footer><span>Tarang · Calm coordination, accountable decisions.</span><span>Read-only dashboard · Times shown in IST</span></footer>
+</div>
+</body></html>

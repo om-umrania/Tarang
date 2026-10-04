@@ -1,0 +1,404 @@
+{
+  "verification_kind": "synthetic integration test; NOT live Telegram or hosted verification",
+  "database_engine": "PostgreSQL",
+  "database_version": "PostgreSQL 15.12 (Homebrew) on aarch64-apple-darwin24.2.0, compiled by Apple clang version 16.0.0 (clang-1600.0.26.6), 64-bit",
+  "isolation": "temporary database cluster and unique per-test schema; schema removed after test",
+  "transport": "authenticated FastAPI TestClient webhook; fake Telegram sendMessage adapter",
+  "model": "deterministic fixture",
+  "stages": [
+    {
+      "stage": "unauthenticated_rejected",
+      "commitment_state": null,
+      "operation_states": [],
+      "delivery": {}
+    },
+    {
+      "stage": "received",
+      "commitment_state": "open",
+      "operation_states": [],
+      "delivery": {}
+    },
+    {
+      "stage": "approval_requested",
+      "commitment_state": "open",
+      "operation_states": [
+        "approval"
+      ],
+      "delivery": {
+        "sent": 1
+      }
+    },
+    {
+      "stage": "unauthorised_chat_rejected",
+      "commitment_state": "open",
+      "operation_states": [
+        "approval"
+      ],
+      "delivery": {
+        "sent": 1
+      }
+    },
+    {
+      "stage": "approved_once",
+      "commitment_state": "open",
+      "operation_states": [
+        "operator_pending"
+      ],
+      "delivery": {
+        "sent": 3
+      }
+    },
+    {
+      "stage": "/pause",
+      "commitment_state": "open",
+      "operation_states": [
+        "operator_pending"
+      ],
+      "delivery": {
+        "sent": 4
+      }
+    },
+    {
+      "stage": "/resume",
+      "commitment_state": "open",
+      "operation_states": [
+        "operator_pending"
+      ],
+      "delivery": {
+        "sent": 5
+      }
+    },
+    {
+      "stage": "operation_reconciled_outcome_open",
+      "commitment_state": "open",
+      "operation_states": [
+        "succeeded"
+      ],
+      "delivery": {
+        "sent": 6
+      }
+    },
+    {
+      "stage": "rehearsal_closed",
+      "commitment_state": "closed",
+      "operation_states": [
+        "succeeded"
+      ],
+      "delivery": {
+        "sent": 7
+      }
+    },
+    {
+      "stage": "reopened_app_same_database",
+      "commitment_state": "closed",
+      "operation_states": [
+        "succeeded"
+      ],
+      "delivery": {
+        "sent": 7
+      }
+    }
+  ],
+  "checks": [
+    "webhook and operator authentication",
+    "duplicate webhook deduplication",
+    "wrong-chat approval rejected",
+    "single-use scoped approval",
+    "operator evidence API persistence",
+    "operation success does not close outcome",
+    "verified fixture evidence allows labelled rehearsal closure",
+    "selected-chat isolation",
+    "dashboard assets served",
+    "fresh app/store reload retains messages, decisions, evidence and delivery"
+  ],
+  "evidence": [
+    {
+      "id": 2,
+      "commitment": 1,
+      "operation": null,
+      "source": "Synthetic venue verifier",
+      "mode": "illustrative-fixture",
+      "content": "Fixture: all 200 hampers received intact at the venue.",
+      "verifies": 1,
+      "created": 1791113767.829108
+    },
+    {
+      "id": 1,
+      "commitment": 1,
+      "operation": 1,
+      "source": "Synthetic courier fixture",
+      "mode": "illustrative-fixture",
+      "content": "Fixture payment reconciled; physical receipt not yet verified.",
+      "verifies": 0,
+      "created": 1791113767.804232
+    }
+  ],
+  "messages": [
+    {
+      "id": "in:1",
+      "direction": "in",
+      "text": "Track my hampers",
+      "status": "done",
+      "created": 1791113767.672988,
+      "kind": "text"
+    },
+    {
+      "id": "out:1",
+      "direction": "out",
+      "text": "\n\nApproval #1: payment \u00b7 Courier\nINR 1200.00 \u00b7 courier\n200 hampers local delivery\nValid for 10 minutes. Operator-assisted; approval does not execute a real transaction.\n\nNext check saved: 04 Oct 17:06:37 IST. ",
+      "status": "sent",
+      "created": 1791113767.6908631,
+      "kind": "text"
+    },
+    {
+      "id": "in:2",
+      "direction": "in",
+      "text": "Selected: Approve once",
+      "status": "done",
+      "created": 1791113767.721639,
+      "kind": "text"
+    },
+    {
+      "id": "out:2",
+      "direction": "out",
+      "text": "Approved once for this exact proposal. It is queued for the operator; no real payment or booking has been executed.",
+      "status": "sent",
+      "created": 1791113767.73117,
+      "kind": "text"
+    },
+    {
+      "id": "out:3",
+      "direction": "out",
+      "text": "Checking the next step.\n\nNext check saved: 04 Oct 17:06:37 IST. ",
+      "status": "sent",
+      "created": 1791113767.7383611,
+      "kind": "text"
+    },
+    {
+      "id": "in:4",
+      "direction": "in",
+      "text": "/pause",
+      "status": "done",
+      "created": 1791113767.760206,
+      "kind": "text"
+    },
+    {
+      "id": "out:4",
+      "direction": "out",
+      "text": "Paused new coordination. Already queued operator requests may be in flight; inspect the operator console before taking over.",
+      "status": "sent",
+      "created": 1791113767.764812,
+      "kind": "text"
+    },
+    {
+      "id": "in:5",
+      "direction": "in",
+      "text": "/resume",
+      "status": "done",
+      "created": 1791113767.7828639,
+      "kind": "text"
+    },
+    {
+      "id": "out:5",
+      "direction": "out",
+      "text": "Monitoring resumed. I will check again in 30 seconds.",
+      "status": "sent",
+      "created": 1791113767.787904,
+      "kind": "text"
+    },
+    {
+      "id": "out:6",
+      "direction": "out",
+      "text": "Checking the next step.\n\nNext check saved: 04 Oct 17:06:37 IST. ",
+      "status": "sent",
+      "created": 1791113767.811915,
+      "kind": "text"
+    },
+    {
+      "id": "out:7",
+      "direction": "out",
+      "text": "\n\nRehearsal outcome closed using labelled illustrative evidence.",
+      "status": "sent",
+      "created": 1791113767.83842,
+      "kind": "text"
+    }
+  ],
+  "decisions": [
+    {
+      "id": 17,
+      "commitment": 1,
+      "kind": "model_decision",
+      "data": {
+        "event_id": 7,
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "decision": {
+          "reason": "Test proposal",
+          "message": "Checking the next step.",
+          "outcome": "200 usable hampers received",
+          "owner": "venue verifier",
+          "next_check_seconds": 30,
+          "operation": null,
+          "close_with_evidence": [
+            2
+          ]
+        },
+        "runtime_notes": [
+          "Rehearsal outcome closed using labelled illustrative evidence."
+        ]
+      },
+      "created": 1791113767.838283
+    },
+    {
+      "id": 16,
+      "commitment": 1,
+      "kind": "evidence_recorded",
+      "data": {
+        "evidence_id": 2,
+        "mode": "illustrative-fixture",
+        "result": "observation"
+      },
+      "created": 1791113767.829395
+    },
+    {
+      "id": 14,
+      "commitment": 1,
+      "kind": "model_decision",
+      "data": {
+        "event_id": 6,
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "decision": {
+          "reason": "Test proposal",
+          "message": "Checking the next step.",
+          "outcome": "200 usable hampers received",
+          "owner": "venue verifier",
+          "next_check_seconds": 30,
+          "operation": null,
+          "close_with_evidence": []
+        },
+        "runtime_notes": []
+      },
+      "created": 1791113767.811764
+    },
+    {
+      "id": 13,
+      "commitment": 1,
+      "kind": "evidence_recorded",
+      "data": {
+        "evidence_id": 1,
+        "mode": "illustrative-fixture",
+        "result": "succeeded"
+      },
+      "created": 1791113767.804518
+    },
+    {
+      "id": 11,
+      "commitment": 1,
+      "kind": "resume",
+      "data": {
+        "actor": 42
+      },
+      "created": 1791113767.7877681
+    },
+    {
+      "id": 9,
+      "commitment": 1,
+      "kind": "pause",
+      "data": {
+        "actor": 42
+      },
+      "created": 1791113767.764682
+    },
+    {
+      "id": 6,
+      "commitment": 1,
+      "kind": "model_decision",
+      "data": {
+        "event_id": 3,
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "decision": {
+          "reason": "Test proposal",
+          "message": "Checking the next step.",
+          "outcome": "200 usable hampers received",
+          "owner": "venue verifier",
+          "next_check_seconds": 30,
+          "operation": null,
+          "close_with_evidence": []
+        },
+        "runtime_notes": []
+      },
+      "created": 1791113767.738212
+    },
+    {
+      "id": 5,
+      "commitment": 1,
+      "kind": "scoped_approval",
+      "data": {
+        "operation_id": 1,
+        "actor": 42,
+        "decision": "approve",
+        "exact_proposal": {
+          "key": "courier",
+          "kind": "payment",
+          "recipient": "Courier",
+          "category": "courier",
+          "amount_paise": 120000,
+          "specification": "200 hampers local delivery",
+          "expires_in_seconds": 600
+        }
+      },
+      "created": 1791113767.730844
+    },
+    {
+      "id": 3,
+      "commitment": 1,
+      "kind": "model_decision",
+      "data": {
+        "event_id": 1,
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "decision": {
+          "reason": "Test proposal",
+          "message": "Checking the next step.",
+          "outcome": "200 usable hampers received",
+          "owner": "venue verifier",
+          "next_check_seconds": 30,
+          "operation": {
+            "key": "courier",
+            "kind": "payment",
+            "recipient": "Courier",
+            "category": "courier",
+            "amount_paise": 120000,
+            "specification": "200 hampers local delivery",
+            "expires_in_seconds": 600
+          },
+          "close_with_evidence": []
+        },
+        "runtime_notes": [
+          "Approval #1: payment \u00b7 Courier\nINR 1200.00 \u00b7 courier\n200 hampers local delivery\nValid for 10 minutes. Operator-assisted; approval does not execute a real transaction."
+        ]
+      },
+      "created": 1791113767.690677
+    },
+    {
+      "id": 2,
+      "commitment": 1,
+      "kind": "operation_intent",
+      "data": {
+        "operation_id": 1,
+        "state": "approval",
+        "mode": "operator-assisted",
+        "proposal": {
+          "key": "courier",
+          "kind": "payment",
+          "recipient": "Courier",
+          "category": "courier",
+          "amount_paise": 120000,
+          "specification": "200 hampers local delivery",
+          "expires_in_seconds": 600
+        }
+      },
+      "created": 1791113767.6904361
+    }
+  ],
+  "restart_fields_equal": true,
+  "live_verification": "not performed: Telegram service/client, OpenRouter, Render, Vercel proxy, browser refresh and real partner rails"
+}
