@@ -143,6 +143,9 @@ class Intake:
         if state["phase"] == "collect" and not missing:
             state["phase"] = "review"
             cls.save(db, chat, state)
+        if lead and state["phase"] != "collect":
+            Store.message(db, key, chat, lead)
+            return
         if state["phase"] == "collect":
             text = QUESTIONS[missing][0]
         elif state["phase"] == "review":
@@ -163,11 +166,6 @@ class Intake:
         else:
             text = "Paused. No background actions are scheduled. You can resume or change a detail."
         options = cls.choices(state)
-        if options:
-            text += "\n\n" + " · ".join(
-                f"{i + 1}. {label}" for i, label in enumerate(options)
-            )
-            text += "\nTap a button or reply /choose followed by its number. You can also type your own answer."
         buttons = [
             [{"text": label, "callback_data": f"demo:pick:{state['revision']}:{i}"}]
             for i, label in enumerate(options)

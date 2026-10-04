@@ -2,15 +2,32 @@
 
 import asyncio
 import json
+import logging
 import time
 import uuid
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from pydantic import BaseModel, ConfigDict, Field
+import httpx
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .store import Store
 from .intake import Intake, QUESTIONS
+
+logger = logging.getLogger(__name__)
+REPLY_NOT_COMPLETED = (
+    "I couldn't finish checking your latest update. Your message is saved, but "
+    "I haven't applied it to the plan or changed any approval. Please resend the update."
+)
+
+
+def retryable_reply_error(exc):
+    if isinstance(exc, (TimeoutError, httpx.TransportError, ValidationError)):
+        return True
+    return isinstance(exc, RuntimeError) and str(exc) in {
+        "model_http_429", "model_http_500", "model_http_502",
+        "model_http_503", "model_http_504",
+    }
 
 
 class DemoReply(BaseModel):
@@ -540,24 +557,10 @@ class PublicDemo:
                 db.execute(
                     "UPDATE demo_turns SET status='failed' WHERE key=?", (stale["key"],)
                 )
-                interrupted = "That AI reply was interrupted. Please try your answer again or use the suggestions."
-                intake = Intake.read(db, stale["chat"])
-                if intake:
-                    Intake.render(
-                        db,
-                        "demo:ai:" + stale["key"],
-                        stale["chat"],
-                        intake,
-                        interrupted,
-                    )
-                else:
-                    Store.message(
-                        db,
-                        "demo:ai:" + stale["key"],
-                        stale["chat"],
-                        interrupted,
-                        MENU,
-                    )
+                Store.message(
+                    db, "demo:ai:" + stale["key"], stale["chat"],
+                    REPLY_NOT_COMPLETED,
+                )
             # Cross-process lease serialises demo model calls without blocking the
             # private wedding worker, including during rolling deployments.
             if db.execute(
@@ -618,21 +621,35 @@ class PublicDemo:
                 ]
             db.execute(
                 "UPDATE demo_turns SET status='processing',lease=? WHERE key=?",
-                (now + 60, turn["key"]),
+                (now + 100, turn["key"]),
             )
-        try:
-            async with asyncio.timeout(40):
-                result = await (
-                    self.model.intake_reply(context)
-                    if conversational
-                    else self.model.demo_reply(context)
+        for attempt in range(2):
+            try:
+                async with asyncio.timeout(40):
+                    result = await (
+                        self.model.intake_reply(context)
+                        if conversational
+                        else self.model.demo_reply(context)
+                    )
+                reply, status = result.message, "done"
+                break
+            except Exception as exc:
+                retryable = retryable_reply_error(exc)
+                # Never log provider bodies, request URLs, user text or credentials.
+                logger.warning(
+                    "Conversation reply failed: type=%s attempt=%d retryable=%s",
+                    type(exc).__name__, attempt + 1, retryable,
                 )
-            reply, status = result.message, "done"
-        except Exception:
-            reply, status = (
-                "The AI is unavailable right now. You can still explore the guided scenarios below, or try your question later.",
-                "failed",
-            )
+                reply, status = REPLY_NOT_COMPLETED, "failed"
+                if attempt or not retryable:
+                    break
+                await asyncio.sleep(1)
+                with self.store.tx() as db:
+                    if not db.execute(
+                        "SELECT 1 FROM demo_turns t JOIN demo_sessions s ON s.chat=t.chat AND s.generation=t.generation WHERE t.key=? AND t.status='processing'",
+                        (turn["key"],),
+                    ).fetchone():
+                        return True
         with self.store.tx() as db:
             current = db.execute(
                 "SELECT 1 FROM demo_turns t JOIN demo_sessions s ON s.chat=t.chat AND s.generation=t.generation WHERE t.key=? AND t.status='processing'",
@@ -648,19 +665,13 @@ class PublicDemo:
                 Intake.apply(db, "demo:ai:" + turn["key"], turn["chat"], result)
                 return True
             if conversational:
-                Intake.render(
-                    db,
-                    "demo:ai:" + turn["key"],
-                    turn["chat"],
-                    Intake.read(db, turn["chat"]),
-                    reply,
-                )
+                Store.message(db, "demo:ai:" + turn["key"], turn["chat"], reply)
                 return True
             Store.message(
                 db,
                 "demo:ai:" + turn["key"],
                 turn["chat"],
                 reply,
-                MENU,
+                MENU if status == "done" else None,
             )
         return True
