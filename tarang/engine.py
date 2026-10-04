@@ -656,11 +656,12 @@ class Engine:
                             "generation": pref["generation"],
                         }
                         db.execute(
-                            "INSERT OR IGNORE INTO outbox(key,chat,payload) VALUES(?,?,?)",
+                            "INSERT OR IGNORE INTO outbox(key,chat,payload,created) VALUES(?,?,?,?)",
                             (
                                 "demo:speech:" + row["key"],
                                 row["chat"],
                                 json.dumps(speech_payload),
+                                time.time(),
                             ),
                         )
             Store.log(

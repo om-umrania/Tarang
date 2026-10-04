@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS demo_intakes(chat INTEGER PRIMARY KEY, body TEXT NOT 
 CREATE TABLE IF NOT EXISTS demo_turns(key TEXT PRIMARY KEY, chat INTEGER NOT NULL, generation TEXT NOT NULL, body TEXT NOT NULL, reply TEXT NOT NULL DEFAULT '', status TEXT NOT NULL, created REAL NOT NULL, lease REAL NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS voice_preferences(chat INTEGER PRIMARY KEY, language TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS voice_jobs(chat INTEGER PRIMARY KEY, key TEXT NOT NULL, generation TEXT NOT NULL, file_id TEXT NOT NULL, language TEXT NOT NULL, token TEXT NOT NULL, status TEXT NOT NULL, transcript TEXT NOT NULL DEFAULT '', created REAL NOT NULL, lease REAL NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS demo_messages(key TEXT PRIMARY KEY, chat INTEGER NOT NULL, body TEXT NOT NULL, created REAL NOT NULL);
+CREATE INDEX IF NOT EXISTS demo_messages_chat ON demo_messages(chat,created);
 CREATE TABLE IF NOT EXISTS demo_seen(key TEXT PRIMARY KEY, created REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS demo_usage(day TEXT NOT NULL, chat INTEGER NOT NULL, kind TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(day,chat,kind));
 """
@@ -47,6 +49,17 @@ class Store:
                         db.execute(statement)
             else:
                 db.executescript(SCHEMA)
+            # Additive migration: old messages keep an unknown (zero) creation time.
+            if self.postgres:
+                db.execute(
+                    "ALTER TABLE outbox ADD COLUMN IF NOT EXISTS created DOUBLE PRECISION NOT NULL DEFAULT 0"
+                )
+            elif "created" not in {
+                r["name"] for r in db.execute("PRAGMA table_info(outbox)")
+            }:
+                db.execute(
+                    "ALTER TABLE outbox ADD COLUMN created REAL NOT NULL DEFAULT 0"
+                )
 
     @contextmanager
     def tx(self):
@@ -96,8 +109,8 @@ class Store:
         if buttons:
             payload["reply_markup"] = {"inline_keyboard": buttons}
         db.execute(
-            "INSERT OR IGNORE INTO outbox(key,chat,payload) VALUES(?,?,?)",
-            (key, chat, json.dumps(payload)),
+            "INSERT OR IGNORE INTO outbox(key,chat,payload,created) VALUES(?,?,?,?)",
+            (key, chat, json.dumps(payload), time.time()),
         )
 
     def snapshot(self):

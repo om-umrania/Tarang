@@ -151,3 +151,12 @@ request preparation and documented-result ingestion are implemented. They retain
 existing exact approvals/delegation, bind beneficiary/reference/amount, preserve
 unknown obligations and never verify fulfilment from a payout. No live financial
 dispatch, sandbox transaction, hosting secret transfer or phone call occurred.
+
+## Dashboard addition — 4 October 2026
+
+The new [dashboard](DASHBOARD.md) reads Telegram conversations and decision status
+from the existing backend. Source routing targets the user-supplied
+https://tarang-virid.vercel.app/ (which returned 404 before these changes).
+Both the website and backend must receive the new revision before live verification.
+The page is operator-only; the operator token is entered privately, never embedded.
+See the dashboard guide for migration, limits, release and acceptance checks.

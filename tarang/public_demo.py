@@ -133,6 +133,7 @@ class PublicDemo:
     def _clear(db, chat):
         db.execute("DELETE FROM voice_jobs WHERE chat=?", (chat,))
         db.execute("DELETE FROM voice_preferences WHERE chat=?", (chat,))
+        db.execute("DELETE FROM demo_messages WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_intakes WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_turns WHERE chat=?", (chat,))
         db.execute("DELETE FROM demo_sessions WHERE chat=?", (chat,))
@@ -251,11 +252,19 @@ class PublicDemo:
             ):
                 self._clear(db, cid)
                 session = None
+            # Store display text only, never Telegram file IDs or callback credentials.
+            from .dashboard import incoming_text
+
+            db.execute(
+                "INSERT OR IGNORE INTO demo_messages(key,chat,body,created) VALUES(?,?,?,?)",
+                (key, cid, incoming_text(update), now),
+            )
             if not session:
                 count = db.execute(
                     "SELECT COUNT(*) AS n FROM demo_sessions"
                 ).fetchone()["n"]
                 if count >= 1000:
+                    db.execute("DELETE FROM demo_messages WHERE key=?", (key,))
                     Store.message(
                         db,
                         key,

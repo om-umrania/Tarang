@@ -58,6 +58,11 @@ class ReviewParser(HTMLParser):
 
 parser = ReviewParser()
 parser.feed(review.read_text())
+dashboard_parser = ReviewParser()
+dashboard_parser.feed((root / 'docs/dashboard.html').read_text())
+result = subprocess.run(['node', '--check', str(root / 'docs/dashboard.js')], capture_output=True, text=True)
+if result.returncode:
+    errors.append(result.stderr)
 for source in [root / 'README.md', root / 'PLANS.md', *sorted((root / 'docs').glob('*.md')), *sorted((root / 'prompts').glob('*.md'))]:
     for target in re.findall(r'\]\(([^)]+)\)', source.read_text()):
         check_link(source, target)
