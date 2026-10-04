@@ -58,6 +58,12 @@ uses calendar-day granularity, so counters can remain for up to eight days.
 ## Free-pilot limits and activation
 
 - 10 AI questions per visitor per day, 100 total per day; failures count.
+- An explicitly approved operator session can set `OPERATOR_MODEL_ALLOWANCE`
+  to `{"date":"2026-10-04","extra_turns":20}`. This grants 20 additional
+  turns only to allowlisted operator IDs on that exact Asia/Kolkata date.
+  The service-wide 100-turn cap and persisted counters remain unchanged.
+  Missing, malformed, expired or out-of-range values grant no extra turns;
+  the maximum permitted addition is 40. Remove the setting after the session.
 - One pending question per visitor and one demo model request in flight globally.
 - At most 2,000 characters per AI question; other files are not processed. Optional `/voice` supports reviewed Telegram voice notes in the conversation; see [voice setup](VOICE_TELEGRAM.md).
 - 100 inputs per visitor / 2,000 total daily; excess inputs are silently dropped

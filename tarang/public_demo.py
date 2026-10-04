@@ -156,6 +156,25 @@ class PublicDemo:
         # Only this chat's demo output. Never alter the private wedding workspace.
         db.execute("DELETE FROM outbox WHERE chat=? AND key LIKE 'demo:%'", (chat,))
 
+    def _model_limit(self, chat, now):
+        if chat not in self.settings.allowed:
+            return 10
+        try:
+            allowance = json.loads(self.settings.operator_model_allowance)
+            day = datetime.fromtimestamp(now, ZoneInfo("Asia/Kolkata")).date().isoformat()
+            if isinstance(allowance, dict) and allowance.get("date") == day:
+                extra = allowance.get("extra_turns")
+                if type(extra) is int and 0 <= extra <= 40:
+                    return 10 + extra
+        except (ValueError, TypeError):
+            pass
+        return 10
+
+    def _session_quota(self, db, chat, kind, now, per_user, global_limit):
+        if kind == "model":
+            per_user = self._model_limit(chat, now)
+        return self._quota(db, chat, kind, now, per_user, global_limit)
+
     @staticmethod
     def _quota(db, chat, kind, now, per_user, global_limit):
         day = datetime.fromtimestamp(now, ZoneInfo("Asia/Kolkata")).date().isoformat()
@@ -230,7 +249,7 @@ class PublicDemo:
             if db.execute("SELECT 1 FROM demo_seen WHERE key=?", (key,)).fetchone():
                 return True
             db.execute("INSERT INTO demo_seen(key,created) VALUES(?,?)", (key, now))
-            allowed = self._quota(db, cid, "input", now, 100, 2000)
+            allowed = self._session_quota(db, cid, "input", now, 100, 2000)
             if command == "/delete":
                 self._clear(db, cid)
                 if allowed:
@@ -336,7 +355,7 @@ class PublicDemo:
                     {},
                     "",
                     command if command else "/voice",
-                    self._quota,
+                    self._session_quota,
                 )
                 if session["scenario"] == "conversation":
                     Intake.render(
@@ -348,7 +367,7 @@ class PublicDemo:
                     )
                 return True
             if self.voice and self.voice.handle(
-                db, key, cid, session, message, data, command, self._quota
+                db, key, cid, session, message, data, command, self._session_quota
             ):
                 return True
             if command in ("/demo", "/help", "/status"):
@@ -502,13 +521,12 @@ class PublicDemo:
                     "I'm still working on your previous question. Please wait for that reply.",
                 )
                 return True
-            if not self._quota(db, cid, "model", now, 10, 100):
+            if not self._session_quota(db, cid, "model", now, 10, 100):
                 Store.message(
                     db,
                     key,
                     cid,
-                    "The free AI demo limit has been reached for today. The guided scenario buttons still work. Limits reset at midnight IST.",
-                    MENU,
+                    "Today's AI message limit has been reached. It resets at midnight IST; this update hasn't changed any approval.",
                 )
                 return True
             if session["scenario"] == "conversation":

@@ -25,6 +25,9 @@ def whatsapp_routes_from_env():
 
 @dataclass
 class Settings:
+    operator_model_allowance: str = field(
+        default_factory=lambda: os.getenv("OPERATOR_MODEL_ALLOWANCE", "")
+    )
     speech_key: str = field(
         default_factory=lambda: os.getenv("GNANI_API_KEY", ""), repr=False
     )
