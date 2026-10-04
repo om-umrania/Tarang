@@ -73,7 +73,10 @@ def test_question_suggestions_complete_action_feedback_and_pause(demo):
         5,
     ):
         choose(demo, uid, label)
-    assert "Here's the plan" in payload(demo)["text"]
+    assert "next step" in payload(demo)["text"]
+    assert "Here's the plan" not in payload(demo)["text"]
+    assert "Problem:" not in payload(demo)["text"]
+    assert "Tap a button" not in payload(demo)["text"]
     choose(demo, 10, "Review contact status")
     assert "Contact status" in payload(demo)["text"]
     choose(demo, 11, "Explore alternatives")

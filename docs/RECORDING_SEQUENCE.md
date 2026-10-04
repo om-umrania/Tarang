@@ -2,6 +2,9 @@
 
 Prepared 4 October 2026. Recording pending release and live verification.
 
+For copy-ready input messages across the Jaipur, décor, hamper, voice and correction
+cases, use the [conversation test runbook](CONVERSATION_TEST_RUNBOOK.md).
+
 Use one décor story throughout. Keep the welcome disclosure once, before the
 use-case conversation. The greeting states the capability limits without demo or
 rehearsal labels. Do not repeat those labels in ordinary messages or buttons.

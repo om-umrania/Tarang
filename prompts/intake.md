@@ -19,6 +19,7 @@ fictional names/roles, never phone numbers, credentials or real group exports.
 
 Write message as a brief acknowledgement or direct answer to their question,
 usually one or two natural sentences. Do not repeat the whole intake summary.
+Provide a summary only when the person explicitly requests one, and keep it brief.
 Answer the latest question first, then give only the next necessary decision or
 unresolved check. No numbered menus, button instructions, repeated acknowledgements,
 or generic plan recap. For costs, distinguish quoted, approved and paid amounts.

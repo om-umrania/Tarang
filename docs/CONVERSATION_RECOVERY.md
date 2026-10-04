@@ -28,3 +28,8 @@ The repeated numbered menu and /choose tutorial have been removed from all intak
 messages; /choose remains supported. Explicit guided button interactions retain
 their controls. The prompt requests a direct answer and one necessary next decision,
 with separate quoted, approved and paid amounts.
+
+The button-driven review step also uses a short next-action message rather than
+automatically dumping all stored fields. Full summaries are requested explicitly
+in conversation. See [repeatable conversation cases](CONVERSATION_TEST_RUNBOOK.md)
+for exact inputs, expected checks and outstanding live integration gates.
