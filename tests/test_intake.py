@@ -73,7 +73,10 @@ def test_question_suggestions_complete_action_feedback_and_pause(demo):
         5,
     ):
         choose(demo, uid, label)
-    assert "Here's the plan" in payload(demo)["text"]
+    assert "next step" in payload(demo)["text"]
+    assert "Here's the plan" not in payload(demo)["text"]
+    assert "Problem:" not in payload(demo)["text"]
+    assert "Tap a button" not in payload(demo)["text"]
     choose(demo, 10, "Review contact status")
     assert "Contact status" in payload(demo)["text"]
     choose(demo, 11, "Explore alternatives")
@@ -105,7 +108,9 @@ def test_free_text_multiple_facts_skip_questions_and_correction_survives_restart
     demo.ingest(update(3, text="Fictional full problem and requirements"))
     asyncio.run(demo.step())
     assert facts(demo)["phase"] == "review"
-    assert "4 pm IST" in payload(demo)["text"]
+    assert facts(demo)["facts"]["deadline"].endswith("4 pm IST")
+    assert payload(demo)["text"] == "I've noted your requirements."
+    assert "reply_markup" not in payload(demo)
     restarted = PublicDemo(demo.store, demo.settings, demo.model)
     demo.model.result = IntakeReply(
         message="I've updated the deadline.",
@@ -117,6 +122,7 @@ def test_free_text_multiple_facts_skip_questions_and_correction_survives_restart
     asyncio.run(restarted.step())
     assert facts(demo)["facts"]["deadline"].endswith("3 pm IST")
     assert facts(demo)["facts"]["constraints"] == "Same design, no extra spend"
+    assert payload(demo)["text"] == "I've updated the deadline."
     assert (
         demo.model.contexts[-1]["history"][0]["body"]
         == "Fictional full problem and requirements"
@@ -164,8 +170,8 @@ def test_provider_failure_preserves_answers_and_question_buttons(demo):
 
     demo.model.intake_reply = fail
     asyncio.run(demo.step())
-    assert "unavailable" in payload(demo)["text"]
-    choose(demo, 5, "Date/time not decided yet")
+    assert "haven't applied" in payload(demo)["text"]
+    assert "Here's the plan" not in payload(demo)["text"]
     assert facts(demo)["facts"]["problem"] == "Hampers haven't arrived"
     assert "sensitive" not in json.dumps(rows(demo, "outbox"))
 
@@ -215,15 +221,15 @@ def test_typed_answer_invitation_does_not_advance_and_unknowns_not_guessed(demo)
     assert "Who should I coordinate" in payload(demo)["text"]
 
 
-def test_expired_model_request_restores_current_question(demo):
+def test_expired_model_request_preserves_facts_without_stale_summary(demo):
     start(demo)
     choose(demo, 3, "Décor is delayed")
     demo.ingest(update(4, text="12 November 2026 at 4 pm IST"))
     with demo.store.tx() as db:
         db.execute("UPDATE demo_turns SET status='processing',lease=0")
     assert not asyncio.run(demo.step())
-    assert "interrupted" in payload(demo)["text"]
-    choose(demo, 5, "Date/time not decided yet")
+    assert "haven't applied" in payload(demo)["text"]
+    assert "Here's the plan" not in payload(demo)["text"]
     assert facts(demo)["facts"]["problem"] == "Décor is delayed"
     assert not demo.model.contexts
 

@@ -206,9 +206,66 @@ def test_provider_failure_is_visible_and_no_automatic_retry(demo):
     demo.model.demo_reply = fail
     asyncio.run(demo.step())
     assert rows(demo, "demo_turns")[0]["status"] == "failed"
-    assert "unavailable" in rows(demo, "outbox")[-1]["payload"]
+    assert "haven't applied" in rows(demo, "outbox")[-1]["payload"]
     assert "sensitive" not in json.dumps(rows(demo, "outbox"))
     assert not asyncio.run(demo.step())
+
+
+def test_transient_failure_recovers_without_error_message(demo):
+    start(demo)
+    demo.ingest(update(3, text="Explain the approval"))
+    calls = []
+
+    async def recover(context):
+        calls.append(context)
+        if len(calls) == 1:
+            raise RuntimeError("model_http_503")
+        return DemoReply(message="The quoted amount needs your approval.")
+
+    demo.model.demo_reply = recover
+    assert asyncio.run(demo.step())
+    assert len(calls) == 2
+    assert calls[0] == calls[1]
+    turn = rows(demo, "demo_turns")[0]
+    assert turn["status"] == "done"
+    assert turn["reply"] == "The quoted amount needs your approval."
+    assert "couldn't finish" not in json.dumps(rows(demo, "outbox"))
+
+
+def test_transient_failure_is_bounded_and_does_not_claim_success(demo):
+    start(demo)
+    demo.ingest(update(3, text="Approve the charge"))
+    calls = []
+
+    async def fail(context):
+        calls.append(context)
+        raise TimeoutError()
+
+    demo.model.demo_reply = fail
+    assert asyncio.run(demo.step())
+    assert len(calls) == 2
+    assert rows(demo, "demo_turns")[0]["status"] == "failed"
+    payload = json.loads(rows(demo, "outbox")[-1]["payload"])
+    assert "haven't applied" in payload["text"]
+    assert "guided scenarios" not in payload["text"]
+    assert "reply_markup" not in payload
+    assert not asyncio.run(demo.step())
+
+
+def test_reset_during_transient_failure_cancels_retry(demo):
+    start(demo)
+    demo.ingest(update(3, text="question"))
+    calls = []
+
+    async def reset(context):
+        calls.append(context)
+        demo.ingest(update(4, text="/reset"))
+        raise TimeoutError()
+
+    demo.model.demo_reply = reset
+    assert asyncio.run(demo.step())
+    assert len(calls) == 1
+    assert not rows(demo, "demo_turns")
 
 
 def test_lease_blocks_other_worker_and_expired_request_not_replayed(demo):

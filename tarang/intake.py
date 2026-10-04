@@ -65,17 +65,6 @@ QUESTIONS = {
         ],
     ),
 }
-LABELS = {
-    "problem": "Problem",
-    "deadline": "Deadline",
-    "contact": "Contact",
-    "approver": "Decision maker",
-    "verifier": "On-site verifier",
-    "constraints": "Preserve",
-    "priority": "Priority",
-}
-
-
 class Intake:
     @staticmethod
     def read(db, chat):
@@ -143,13 +132,16 @@ class Intake:
         if state["phase"] == "collect" and not missing:
             state["phase"] = "review"
             cls.save(db, chat, state)
+        if lead and state["phase"] != "collect":
+            Store.message(db, key, chat, lead)
+            return
         if state["phase"] == "collect":
             text = QUESTIONS[missing][0]
         elif state["phase"] == "review":
-            text = "Here's the plan so far:\n" + "\n".join(
-                f"{LABELS[k]}: {v}" for k, v in state["facts"].items()
+            text = (
+                "The next step is to confirm the contact's status and recovery options. "
+                "Any change to cost or scope needs the decision maker's approval."
             )
-            text += "\n\nI'd first ask the contact for the current status and feasible recovery options, preserving your requirements. Then I'd bring material trade-offs to your decision maker and seek an on-site check. Shall we review the next step, or change something?"
         elif state["phase"] == "investigated":
             text = (
                 "Contact status: the original plan cannot yet be confirmed; recovery options, costs and timing still need checking.\n\n"
@@ -163,11 +155,6 @@ class Intake:
         else:
             text = "Paused. No background actions are scheduled. You can resume or change a detail."
         options = cls.choices(state)
-        if options:
-            text += "\n\n" + " · ".join(
-                f"{i + 1}. {label}" for i, label in enumerate(options)
-            )
-            text += "\nTap a button or reply /choose followed by its number. You can also type your own answer."
         buttons = [
             [{"text": label, "callback_data": f"demo:pick:{state['revision']}:{i}"}]
             for i, label in enumerate(options)
